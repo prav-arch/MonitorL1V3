@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-04-24 10:48:40",
+  "node_metrics": {
+    "cpu_utilization": 15.488168480908353,
+    "memory_utilization": 31.170064679209897,
+    "disk_space_used": 41.103879810583805,
+    "network_throughput_mbps": 912.7419164086358
+  },
+  "service_metrics": [
+    {
+      "service_name": "core-network",
+      "response_time_ms": 14.32636736922609,
+      "request_count": 3486,
+      "error_rate": 0.042139619037744026
+    },
+    {
+      "service_name": "radio-access",
+      "response_time_ms": 13.753260827935009,
+      "request_count": 2713,
+      "error_rate": 0.015694320987823845
+    }
+  ]
+}

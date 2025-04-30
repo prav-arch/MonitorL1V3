@@ -1,0 +1,800 @@
+/* Custom styles for L1 Monitoring application */
+
+/* Global UI Styling for Dark Theme */
+body {
+    background-color: #0d1117;
+    color: #e6edf3;
+}
+
+/* Card styling to match AI Predictive Maintenance */
+.card {
+    background-color: #1e2430 !important; 
+    border: 1px solid #30363d !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+    border-bottom: 1px solid #30363d !important;
+    padding: 0.75rem 1.25rem;
+}
+
+.card.border-info {
+    border-color: #0dcaf0 !important;
+}
+
+.card.border-primary {
+    border-color: #0d6efd !important;
+}
+
+.card.border-secondary {
+    border-color: #6c757d !important;
+}
+
+.card.border-warning {
+    border-color: #ffc107 !important;
+}
+
+.card.border-danger {
+    border-color: #dc3545 !important;
+}
+
+.card.border-success {
+    border-color: #198754 !important;
+}
+
+/* Card header styling with colors */
+.card-header.bg-info.bg-opacity-25 {
+    background-color: rgba(13, 202, 240, 0.15) !important; 
+}
+
+.card-header.bg-primary.bg-opacity-25 {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+}
+
+.card-header.bg-secondary.bg-opacity-25 {
+    background-color: rgba(108, 117, 125, 0.15) !important;
+}
+
+.card-header.bg-warning.bg-opacity-25 {
+    background-color: rgba(255, 193, 7, 0.15) !important;
+}
+
+.card-header.bg-danger.bg-opacity-25 {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+}
+
+.card-header.bg-success.bg-opacity-25 {
+    background-color: rgba(25, 135, 84, 0.15) !important;
+}
+
+/* Table styling */
+.table {
+    color: #e6edf3 !important;
+    background-color: transparent !important;
+}
+
+.table-dark {
+    background-color: #1e2430 !important;
+}
+
+.table-dark td, .table-dark th {
+    border-color: #30363d !important;
+}
+
+.table-dark.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.075) !important;
+}
+
+/* Badge styling */
+.badge {
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Headings and text */
+h1, h2, h3, h4, h5, h6 {
+    color: #f0f6fc !important;
+}
+
+.text-muted {
+    color: #8b949e !important;
+}
+
+/* Page header styling like AI Predictive Maintenance */
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #f0f6fc !important;
+    margin-bottom: 0.5rem;
+}
+
+.page-header p {
+    color: #8b949e !important;
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+/* Online status */
+.status-indicator.online i {
+    color: #28a745 !important;
+}
+
+/* Offline status */
+.status-indicator.offline i {
+    color: #dc3545 !important;
+}
+
+/* Degraded status */
+.status-indicator.degraded i {
+    color: #ffc107 !important;
+}
+
+/* Dark theme text colors */
+[data-bs-theme="dark"] .status-indicator .status-text {
+    color: #f8f9fa !important;
+}
+
+/* Light theme text colors */
+[data-bs-theme="light"] .status-indicator .status-text {
+    color: #000000 !important;
+}
+
+/* Light theme specific icon colors, reinforcing them */
+[data-bs-theme="light"] .status-indicator.online i {
+    color: #28a745 !important;
+}
+
+[data-bs-theme="light"] .status-indicator.offline i {
+    color: #dc3545 !important;
+}
+
+[data-bs-theme="light"] .status-indicator.degraded i {
+    color: #ffc107 !important;
+}
+
+/* Log levels */
+.level-ERROR {
+    color: var(--bs-danger);
+}
+
+.level-WARN, .level-WARNING {
+    color: var(--bs-warning);
+}
+
+.level-INFO {
+    color: var(--bs-info);
+}
+
+.level-DEBUG {
+    color: var(--bs-secondary);
+}
+
+/* Anomaly highlighting */
+.log-entry.anomaly {
+    background-color: rgba(220, 53, 69, 0.08) !important;
+    border-left: 3px solid var(--bs-danger);
+    transition: background-color 0.3s ease;
+}
+
+.log-entry.anomaly:hover {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+}
+
+.log-entry.mild-anomaly {
+    background-color: rgba(255, 193, 7, 0.08) !important;
+    border-left: 3px solid var(--bs-warning);
+    transition: background-color 0.3s ease;
+}
+
+.log-entry.mild-anomaly:hover {
+    background-color: rgba(255, 193, 7, 0.15) !important;
+}
+
+.log-entry.structural-anomaly {
+    background-color: rgba(13, 110, 253, 0.08) !important;
+    border-left: 3px solid var(--bs-primary);
+    transition: background-color 0.3s ease;
+}
+
+.log-entry.structural-anomaly:hover {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+}
+
+.anomaly-indicator {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+    background-color: var(--bs-danger);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    min-width: 20px;
+}
+
+.anomaly-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.anomaly-badge i {
+    color: var(--bs-danger);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.5);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(128, 128, 128, 0.7);
+}
+
+/* Chart tooltips */
+.chart-tooltip {
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 4px;
+    padding: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.chart-tooltip-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: white;
+}
+
+.chart-tooltip-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.chart-tooltip-value {
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+    
+    .log-list {
+        max-height: 300px;
+    }
+    
+    /* Mobile-optimized layout adjustments */
+    .mobile-optimized {
+        padding: 10px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    /* Improved spacing for mobile */
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    /* Optimize gauge display on mobile */
+    .single-column > .col {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Better spacing for very small screens */
+    .very-small-screen {
+        padding: 5px !important;
+    }
+}
+
+/* Transition effects */
+.card {
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.suggestion-highlight {
+    background-color: rgba(255, 193, 7, 0.2);
+    padding: 0 0.25rem;
+    border-radius: 0.25rem;
+}
+
+/* Upload progress */
+.upload-progress-container {
+    margin-top: 1rem;
+}
+
+.upload-progress-container .progress {
+    height: 6px;
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive tables */
+.table-responsive {
+    position: relative;
+}
+
+@media (max-width: 767px) {
+    .table th:not(:first-child):not(:last-child),
+    .table td:not(:first-child):not(:last-child) {
+        display: none;
+    }
+}
+
+/* Telecom Network Visualization */
+.telecom-dashboard-container {
+    min-height: 500px;
+    position: relative;
+}
+
+.telecom-canvas-container {
+    width: 100%;
+    height: 500px;
+    background-color: rgba(33, 37, 41, 0.8);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.network-label {
+    position: absolute;
+    font-size: 14px;
+    color: #adb5bd;
+    background-color: rgba(33, 37, 41, 0.7);
+    padding: 2px 8px;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+.core-label {
+    top: 10px;
+    right: 10px;
+}
+
+.ran-label {
+    top: 10px;
+    left: 10px;
+}
+
+.telecom-details-container {
+    height: 500px;
+    overflow-y: auto;
+}
+
+.health-card {
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.health-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.health-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.telecom-legend {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(33, 37, 41, 0.8);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 10;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+/* Telecom node pulse animation */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+.pulse-circle {
+    position: absolute;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* Telecom traffic flow animation */
+@keyframes flowParticle {
+    0% { transform: translateX(0) translateY(0); opacity: 1; }
+    100% { transform: translateX(100%) translateY(100%); opacity: 0.7; }
+}
+
+/* Fix for Data Pipeline tab buttons */
+.data-pipeline-actions .btn, 
+.modal-body .btn, 
+.modal-footer .btn {
+    color: #000 !important;
+    background-color: #fff !important;
+}
+
+/* Fix for modal text */
+.modal-body {
+    color: #000 !important;
+    background-color: #fff !important;
+}
+
+/* Navbar styling to match AI Predictive Maintenance */
+.navbar {
+    background-color: #161b22 !important;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    color: #f0f6fc !important;
+}
+
+/* Vertical Menu Styling */
+.vertical-menu {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.vertical-menu .card-header {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+.vertical-menu .list-group-item {
+    background-color: #1e2430;
+    color: #adb5bd;
+    border: none;
+    border-bottom: 1px solid #30363d;
+    padding: 0.8rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.vertical-menu .list-group-item:hover {
+    background-color: rgba(13, 110, 253, 0.15);
+    color: #fff;
+}
+
+.vertical-menu .list-group-item.active {
+    background-color: rgba(13, 110, 253, 0.3);
+    color: #fff;
+    font-weight: bold;
+    border-left: 4px solid #0d6efd;
+}
+
+.vertical-menu .list-group-item i {
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* Menu Section Styling */
+.menu-section-header {
+    cursor: pointer;
+    font-weight: 600;
+    background-color: #242e3d;
+    border-left: 4px solid #6c757d;
+}
+
+.menu-section-header:hover {
+    background-color: #2c3a4d;
+    transform: none !important;
+}
+
+.menu-section-header .section-toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.menu-section-header.collapsed .section-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.menu-section-items {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    max-height: 500px; /* Default open state */
+}
+
+.menu-section-items.collapsed {
+    max-height: 0;
+    overflow: hidden;
+}
+
+/* Indentation for nested menu items */
+.menu-section-items .list-group-item {
+    padding-left: 2.5rem;
+    border-left: none;
+}
+
+.menu-section-items .list-group-item:hover {
+    transform: translateX(5px);
+}
+
+.menu-section-items .list-group-item.active {
+    border-left: 4px solid #0d6efd;
+}
+
+.vertical-menu .card-footer {
+    background-color: #1e2430;
+    border-top: 1px solid #30363d;
+}
+
+/* Small devices (landscape phones, less than 768px) */
+@media (max-width: 767.98px) {
+    .vertical-menu {
+        margin-bottom: 1rem;
+    }
+    
+    .vertical-menu .list-group-item {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .vertical-menu .list-group-item i {
+        margin-right: 8px;
+    }
+}
+
+/* Button styling to match AI Predictive Maintenance */
+.btn-outline-primary, .btn-outline-secondary, .btn-outline-info {
+    border-color: #30363d !important;
+    color: #e6edf3 !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-primary:hover, .btn-outline-secondary:hover, .btn-outline-info:hover {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    color: #fff !important;
+}
+
+.btn-outline-info {
+    border-color: #0dcaf0 !important;
+    color: #0dcaf0 !important;
+}
+
+.btn-outline-info:hover {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+/* Page container styling */
+.container-fluid {
+    padding: 1.5rem;
+}
+
+/* Footer styling to match AI Predictive Maintenance */
+.footer {
+    background-color: #161b22 !important;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.footer .text-muted {
+    color: #8b949e !important;
+}
+
+.footer i {
+    margin: 0 5px;
+    color: #0dcaf0;
+}
+
+/* File Content Previewer */
+#file-content {
+    color: #000 !important;
+    background-color: #fff !important;
+    padding: 10px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+#preview-filename {
+    color: #000 !important;
+    font-weight: bold;
+}
+
+.bg-light {
+    background-color: #fff !important;
+}
+
+.modal-title {
+    color: #000 !important;
+}
+
+.flow-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: #28a745;
+    animation: flowParticle 2s linear infinite;
+}
+
+/* Fine-tuning UI Styles */
+.document-card {
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.document-card:hover {
+    border-left-color: var(--bs-primary);
+    transform: translateX(5px);
+}
+
+.document-card.processed {
+    border-left-color: var(--bs-success);
+}
+
+.document-card.unprocessed {
+    border-left-color: var(--bs-warning);
+}
+
+.document-type-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-left: 0.5rem;
+    text-transform: uppercase;
+}
+
+.document-type-log {
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
+}
+
+.document-type-pdf {
+    background-color: var(--bs-danger);
+    color: var(--bs-light);
+}
+
+.document-type-doc, .document-type-docx {
+    background-color: var(--bs-primary);
+    color: var(--bs-light);
+}
+
+.document-type-ppt, .document-type-pptx {
+    background-color: var(--bs-warning);
+    color: var(--bs-dark);
+}
+
+.content-type-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-right: 0.5rem;
+    text-transform: uppercase;
+}
+
+.content-type-telecom {
+    background-color: var(--bs-info);
+    color: var(--bs-light);
+}
+
+.content-type-general {
+    background-color: var(--bs-secondary);
+    color: var(--bs-light);
+}
+
+.fine-tuning-job-card {
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.fine-tuning-job-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.job-status-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-right: 0.5rem;
+    text-transform: uppercase;
+}
+
+.job-status-pending {
+    background-color: var(--bs-secondary);
+    color: var(--bs-light);
+}
+
+.job-status-running {
+    background-color: var(--bs-primary);
+    color: var(--bs-light);
+}
+
+.job-status-completed {
+    background-color: var(--bs-success);
+    color: var(--bs-light);
+}
+
+.job-status-failed {
+    background-color: var(--bs-danger);
+    color: var(--bs-light);
+}
+
+.progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes spinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spinner 0.8s linear infinite;
+    margin-right: 0.5rem;
+}

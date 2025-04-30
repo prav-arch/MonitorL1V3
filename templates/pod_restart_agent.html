@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Pod Restart Agent{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <h1 class="mb-4">Kubernetes Pod Restart Agent</h1>
+
+    <div class="row">
+        <!-- Agent Overview and Status -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Agent Status</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Status:</span>
+                        <span id="agent-status" class="badge bg-secondary">Unknown</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Mode:</span>
+                        <span id="agent-mode" class="badge bg-secondary">Unknown</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Monitored Pods:</span>
+                        <span id="monitored-pod-count">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Restarted Pods:</span>
+                        <span id="restarted-pod-count">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total Restarts:</span>
+                        <span id="total-restarts">0</span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button id="toggle-agent-status" class="btn btn-primary">Start Agent</button>
+                        <button id="refresh-agent-status" class="btn btn-secondary">Refresh Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Configuration -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Agent Configuration</h4>
+                </div>
+                <div class="card-body">
+                    <form id="pod-restart-config-form">
+                        <div class="mb-3">
+                            <label for="error-threshold" class="form-label">Error Threshold</label>
+                            <input type="number" class="form-control" id="error-threshold" name="error_threshold" min="1" max="100" value="10">
+                            <div class="form-text">Number of errors before triggering a restart</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cooldown-period" class="form-label">Cooldown Period (seconds)</label>
+                            <input type="number" class="form-control" id="cooldown-period" name="cooldown_period" min="30" max="3600" value="300">
+                            <div class="form-text">Time to wait between restarts of the same pod</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="check-interval" class="form-label">Check Interval (seconds)</label>
+                            <input type="number" class="form-control" id="check-interval" name="check_interval" min="10" max="600" value="60">
+                            <div class="form-text">Time between health checks</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="namespace" class="form-label">Kubernetes Namespace</label>
+                            <input type="text" class="form-control" id="namespace" name="namespace" value="default">
+                            <div class="form-text">Namespace to monitor</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Update Configuration</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitored Pods -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Monitored Pods</h4>
+                </div>
+                <div class="card-body">
+                    <div id="monitored-pods-list">
+                        <div class="alert alert-info">
+                            Loading pod data...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restart History -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Restart History</h4>
+                </div>
+                <div class="card-body">
+                    <div id="restart-history-list">
+                        <div class="alert alert-info">
+                            Loading restart history...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Restart Details Modal -->
+<div class="modal fade" id="restartDetailsModal" tabindex="-1" aria-labelledby="restartDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="restartDetailsModalLabel">Restart Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="restartDetailsModalBody">
+                <!-- Modal content will be populated by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container for Notifications -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100" id="toast-container">
+    <!-- Toasts will be inserted here by JavaScript -->
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pod-restart-agent.js') }}"></script>
+{% endblock %}

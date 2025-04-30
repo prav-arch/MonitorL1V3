@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ollama-init-script
+data:
+  init.sh: |
+    #!/bin/sh
+    set -e
+    
+    # Check if model is already downloaded
+    if ollama list | grep -q "llama2"; then
+      echo "Model llama2 already exists."
+    else
+      echo "Pulling llama2 model..."
+      # Pull the model
+      ollama pull llama2
+      echo "Model llama2 pulled successfully."
+    fi

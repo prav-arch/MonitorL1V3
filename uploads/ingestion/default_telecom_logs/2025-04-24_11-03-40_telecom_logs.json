@@ -1,0 +1,42 @@
+[
+  {
+    "timestamp": "2025-04-24 11:03:40",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Handover complete for UE ID-F3e45673",
+    "source_ip": "192.168.3.102",
+    "correlation_id": "corr-c9911B"
+  },
+  {
+    "timestamp": "2025-04-24 11:03:40",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Handover complete for UE ID-5B4aC4E5",
+    "source_ip": "192.168.168.45",
+    "correlation_id": "corr-d0B956"
+  },
+  {
+    "timestamp": "2025-04-24 11:03:40",
+    "level": "ERROR",
+    "service": "core-network",
+    "message": "Resource allocation failed for bandwidth",
+    "source_ip": "192.168.109.179",
+    "correlation_id": "corr-1c9Ec4"
+  },
+  {
+    "timestamp": "2025-04-24 11:03:40",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Connection established to signaling",
+    "source_ip": "192.168.19.20",
+    "correlation_id": "corr-BDeDfd"
+  },
+  {
+    "timestamp": "2025-04-24 11:03:40",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Configuration update applied to subscriber-db",
+    "source_ip": "192.168.220.116",
+    "correlation_id": "corr-E547a8"
+  }
+]

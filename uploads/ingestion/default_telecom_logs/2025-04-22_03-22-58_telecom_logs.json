@@ -1,0 +1,90 @@
+[
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "ERROR",
+    "service": "subscriber-db",
+    "message": "Database query failed: invalid credentials",
+    "source_ip": "192.168.61.107",
+    "correlation_id": "corr-0A7eF7"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "WARN",
+    "service": "signaling",
+    "message": "Retry attempt 557 for operation",
+    "source_ip": "192.168.207.40",
+    "correlation_id": "corr-e4fEFa"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Processed 731 packets successfully",
+    "source_ip": "192.168.125.84",
+    "correlation_id": "corr-3d54cC"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Session initiated for subscriber ID-aB4F7feA",
+    "source_ip": "192.168.57.153",
+    "correlation_id": "corr-C8e4A1"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Configuration update applied to packet-gateway",
+    "source_ip": "192.168.129.10",
+    "correlation_id": "corr-eFC87a"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Processed 454 packets successfully",
+    "source_ip": "192.168.107.4",
+    "correlation_id": "corr-98790F"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Connection established to core-network",
+    "source_ip": "192.168.178.115",
+    "correlation_id": "corr-b4F452"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "ERROR",
+    "service": "subscriber-db",
+    "message": "Database query failed: timeout",
+    "source_ip": "192.168.247.49",
+    "correlation_id": "corr-e8Ae1F"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Processed 892 packets successfully",
+    "source_ip": "192.168.224.79",
+    "correlation_id": "corr-E19ef5"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Connection established to core-network",
+    "source_ip": "192.168.32.175",
+    "correlation_id": "corr-9cbF23"
+  },
+  {
+    "timestamp": "2025-04-22 03:22:58",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Configuration update applied to packet-gateway",
+    "source_ip": "192.168.66.121",
+    "correlation_id": "corr-CeE63A"
+  }
+]

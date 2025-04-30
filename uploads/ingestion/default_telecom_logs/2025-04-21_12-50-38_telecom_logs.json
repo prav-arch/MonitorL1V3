@@ -1,0 +1,98 @@
+[
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Session initiated for subscriber ID-0A74e562",
+    "source_ip": "192.168.106.38",
+    "correlation_id": "corr-cb41A1"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Session initiated for subscriber ID-2D9A9feC",
+    "source_ip": "192.168.195.158",
+    "correlation_id": "corr-BFDf03"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "WARN",
+    "service": "subscriber-db",
+    "message": "Connection pool nearing capacity",
+    "source_ip": "192.168.27.141",
+    "correlation_id": "corr-9Cfb4e"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "WARN",
+    "service": "packet-gateway",
+    "message": "Slow response from subscriber-db",
+    "source_ip": "192.168.25.69",
+    "correlation_id": "corr-3b336F"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Session initiated for subscriber ID-dB902DaE",
+    "source_ip": "192.168.45.180",
+    "correlation_id": "corr-8a6145"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Processed 901 packets successfully",
+    "source_ip": "192.168.144.158",
+    "correlation_id": "corr-3B45e5"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "WARN",
+    "service": "core-network",
+    "message": "High latency detected in signaling",
+    "source_ip": "192.168.132.30",
+    "correlation_id": "corr-499cc7"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "WARN",
+    "service": "signaling",
+    "message": "Buffer utilization at 75%",
+    "source_ip": "192.168.157.80",
+    "correlation_id": "corr-17dDc5"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "ERROR",
+    "service": "subscriber-db",
+    "message": "Timeout occurred during authentication",
+    "source_ip": "192.168.170.237",
+    "correlation_id": "corr-8dd558"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Connection established to radio-access",
+    "source_ip": "192.168.79.51",
+    "correlation_id": "corr-351E3D"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "WARN",
+    "service": "radio-access",
+    "message": "High latency detected in core-network",
+    "source_ip": "192.168.199.125",
+    "correlation_id": "corr-22C754"
+  },
+  {
+    "timestamp": "2025-04-21 12:50:38",
+    "level": "WARN",
+    "service": "radio-access",
+    "message": "Retry attempt 434 for operation",
+    "source_ip": "192.168.48.102",
+    "correlation_id": "corr-Ad82B5"
+  }
+]

@@ -1,0 +1,138 @@
+/**
+ * Update the lifecycle prediction section
+ * @param {Object} data - AI recommendations data
+ */
+function updateLifecyclePrediction(data) {
+    console.log('Updating lifecycle prediction:', data);
+    
+    const container = document.getElementById('lifecyclePrediction');
+    if (!container) {
+        console.error('Lifecycle prediction container not found');
+        return;
+    }
+    
+    // Clear existing content including the spinner
+    container.innerHTML = '';
+    
+    // Get lifecycle predictions from the recommendations
+    const predictions = data.lifecycle_predictions || [];
+    
+    if (predictions.length === 0) {
+        // No prediction data available, show a message
+        const noDataDiv = document.createElement('div');
+        noDataDiv.className = 'alert alert-info';
+        noDataDiv.innerHTML = `
+            <i class="fas fa-info-circle me-2"></i>
+            No lifecycle prediction data is currently available. This section will update when prediction data is generated.
+        `;
+        container.appendChild(noDataDiv);
+        return;
+    }
+    
+    // Create a timeline container
+    const timeline = document.createElement('div');
+    timeline.className = 'lifecycle-timeline';
+    
+    // Current date for calculations
+    const currentDate = new Date();
+    
+    // Process and display predictions
+    predictions.forEach((prediction, index) => {
+        // Create timeline item
+        const timelineItem = document.createElement('div');
+        timelineItem.className = 'timeline-item';
+        
+        // Determine status color based on prediction status
+        let statusColor = '#ffc107'; // Default to warning/yellow
+        if (prediction.status === 'critical' || prediction.status === 'end_of_life') {
+            statusColor = '#dc3545'; // Danger/red
+        } else if (prediction.status === 'stable' || prediction.status === 'optimal') {
+            statusColor = '#198754'; // Success/green
+        } else if (prediction.status === 'new' || prediction.status === 'recent_update') {
+            statusColor = '#0dcaf0'; // Info/blue
+        }
+        
+        // Add timeline dot
+        const timelineDot = document.createElement('div');
+        timelineDot.className = 'timeline-dot';
+        timelineDot.style.backgroundColor = statusColor;
+        
+        // Add timeline content
+        const timelineContent = document.createElement('div');
+        timelineContent.className = 'timeline-content';
+        timelineContent.style.borderLeftColor = statusColor;
+        
+        // Format dates
+        const startDate = new Date(prediction.lifecycle_start || prediction.install_date);
+        const endDate = new Date(prediction.end_of_life || prediction.replacement_date);
+        
+        const formattedStartDate = startDate.toLocaleDateString(undefined, { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+        
+        const formattedEndDate = endDate.toLocaleDateString(undefined, { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+        
+        // Calculate remaining time
+        const timeRemaining = Math.max(0, endDate - currentDate);
+        const daysRemaining = Math.ceil(timeRemaining / (1000 * 60 * 60 * 24));
+        
+        // Build the timeline content HTML
+        timelineContent.innerHTML = `
+            <h5>${prediction.component || prediction.name}</h5>
+            <div class="mb-2">
+                <span class="badge" style="background-color: ${statusColor}">
+                    ${capitalizeFirstLetter(prediction.status)}
+                </span>
+                ${prediction.urgency ? 
+                    `<span class="badge bg-secondary ms-2">${capitalizeFirstLetter(prediction.urgency)} Priority</span>` : 
+                    ''}
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <small class="text-muted">Installed:</small>
+                    <div>${formattedStartDate}</div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">End of Life:</small>
+                    <div>${formattedEndDate}</div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">Remaining:</small>
+                    <div>${daysRemaining} days</div>
+                </div>
+            </div>
+            <div class="mt-2">
+                ${prediction.recommendation || ''}
+            </div>
+            ${prediction.next_steps ? 
+                `<div class="mt-2">
+                    <small class="text-muted">Next Steps:</small>
+                    <div>${prediction.next_steps}</div>
+                </div>` : 
+                ''}
+        `;
+        
+        // Add timeline line (except for the last item)
+        if (index < predictions.length - 1) {
+            const timelineLine = document.createElement('div');
+            timelineLine.className = 'timeline-line';
+            timelineItem.appendChild(timelineLine);
+        }
+        
+        // Build the timeline item
+        timelineItem.appendChild(timelineDot);
+        timelineItem.appendChild(timelineContent);
+        
+        // Add item to timeline
+        timeline.appendChild(timelineItem);
+    });
+    
+    // Add timeline to container
+    container.appendChild(timeline);
+}

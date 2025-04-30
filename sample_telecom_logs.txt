@@ -1,0 +1,43 @@
+2025-04-24T12:00:01 ERROR [network] TCP connection failure on port 4523 - OpenRAN Interface timeout
+2025-04-24T12:00:45 WARN [RAN] eCPRI fronthaul link degraded performance on sector 3, latency: 5.4ms
+2025-04-24T12:01:23 ERROR [backhaul] Connection timeout on X2 interface between eNB103 and eNB104
+2025-04-24T12:02:58 CRITICAL [cell] 5G gNB cell ID 28374 outage detected, affecting coverage area 15-B
+2025-04-24T12:03:17 ERROR [OpenRAN] RU synchronization error with O-DU, packet loss 15%
+2025-04-24T12:04:05 WARN [network] TCP retransmission rate exceeding threshold (5.2%) on S1-U interface
+2025-04-24T12:05:32 INFO [system] Automatic power compensation activated for sector 11-C
+2025-04-24T12:06:45 ERROR [core] MME service restart triggered due to tracking area integrity check failure
+2025-04-24T12:07:11 WARN [RAN] PRB utilization at 95% on cell ID 4721, consider capacity expansion
+2025-04-24T12:08:02 INFO [system] Successfully completed interference measurement for frequency band n78
+2025-04-24T12:09:30 ERROR [OpenRAN] O-CU control plane disconnected from O-DU, sync lost
+2025-04-24T12:10:15 DEBUG [network] SCTP association established between MME and eNB ID 1047
+2025-04-24T12:11:22 ERROR [core] UE authentication failure rate exceeding threshold (3.2%), potential SIM card issue
+2025-04-24T12:12:51 WARN [RAN] Interference detected on PCI 234, SINR degraded to 4.5dB
+2025-04-24T12:13:09 INFO [system] Initiating automated neighbor relation (ANR) scan for cell ID 8823
+2025-04-24T12:14:27 ERROR [backhaul] Fiber link BH-221 experiencing 3.4dB attenuation, exceeding threshold
+2025-04-24T12:15:33 CRITICAL [cell] Massive MIMO beam failure on antenna array 4, impacting 128 UEs
+2025-04-24T12:16:02 WARN [network] Increased latency (45ms) detected on S1-MME interface to eNB cluster
+2025-04-24T12:17:50 INFO [core] HSS database synchronization completed, 256783 subscribers updated
+2025-04-24T12:18:11 ERROR [OpenRAN] O-RU temperature exceeding operating threshold (58°C), thermal throttling activated
+2025-04-24T12:19:45 WARN [RAN] Reference signal power deviation detected on PCI 512, causing coverage gap
+2025-04-24T12:20:34 ERROR [network] IP fragmentation detected on backhaul link, MTU misconfiguration likely
+2025-04-24T12:21:25 INFO [system] Carrier aggregation successfully activated for UE group in sector 7
+2025-04-24T12:22:18 ERROR [core] SGW overload condition detected, packet processing delay increased to 120ms
+2025-04-24T12:23:07 WARN [RAN] Timing advance reaching upper limit (795) for UEs at cell edge in sector 4
+2025-04-24T12:24:30 CRITICAL [cell] Radio link failure rate at 8.7% on cell 6432, exceeding service threshold
+2025-04-24T12:25:14 INFO [system] Beamforming optimization completed on sector 9, SINR improved by 3.2dB
+2025-04-24T12:26:29 ERROR [OpenRAN] Fronthaul interface bandwidth constraint detected, impacting 7 connected RUs
+2025-04-24T12:27:45 WARN [network] QCI 1 traffic experiencing increased jitter (12ms) on sector 3
+2025-04-24T12:28:32 INFO [core] AAA server processing load at 78%, within operational parameters
+2025-04-24T12:29:51 ERROR [backhaul] Packet error rate 2.3% on microwave link MW-042, exceeding threshold
+2025-04-24T12:30:17 WARN [RAN] RACH preamble collision rate increased to 8.4% during busy hour on cell 1234
+2025-04-24T12:31:03 INFO [system] Self-organizing network (SON) reconfigured 34 PCI values to resolve conflicts
+2025-04-24T12:32:22 ERROR [core] S6a diameter interface timeout to HSS, affecting authentication requests
+2025-04-24T12:33:41 CRITICAL [OpenRAN] O-DU processing capacity exceeded, causing 14 RUs to disconnect
+2025-04-24T12:34:15 WARN [network] Increased ICMP timeout errors on Operations network segment 172.16.45.0/24
+2025-04-24T12:35:27 INFO [system] Energy saving mode activated for low-traffic sectors 12, 14, and 18
+2025-04-24T12:36:33 ERROR [RAN] Handover failure rate reached 4.7% between adjacent sectors in urban cluster
+2025-04-24T12:37:19 WARN [core] P-GW traffic shaping applied due to congestion toward internet peering
+2025-04-24T12:38:52 INFO [system] Updated radio parameter database with latest optimization values
+2025-04-24T12:39:08 ERROR [OpenRAN] Fronthaul synchronization drift detected, affecting timing alignment
+2025-04-24T12:40:27 WARN [network] BGP flap detected at router edge-45, potential route instability
+2025-04-24T12:41:36 INFO [core] Successfully completed inter-RAT handover tests between 5G and 4G

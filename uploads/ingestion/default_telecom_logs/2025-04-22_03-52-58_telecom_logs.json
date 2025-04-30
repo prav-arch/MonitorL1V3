@@ -1,0 +1,58 @@
+[
+  {
+    "timestamp": "2025-04-22 03:52:58",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Configuration update applied to packet-gateway",
+    "source_ip": "192.168.65.104",
+    "correlation_id": "corr-B424fa"
+  },
+  {
+    "timestamp": "2025-04-22 03:52:58",
+    "level": "WARN",
+    "service": "radio-access",
+    "message": "High latency detected in packet-gateway",
+    "source_ip": "192.168.172.142",
+    "correlation_id": "corr-9DDcAB"
+  },
+  {
+    "timestamp": "2025-04-22 03:52:58",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Handover complete for UE ID-766848a6",
+    "source_ip": "192.168.121.61",
+    "correlation_id": "corr-aC17df"
+  },
+  {
+    "timestamp": "2025-04-22 03:52:58",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Configuration update applied to packet-gateway",
+    "source_ip": "192.168.18.90",
+    "correlation_id": "corr-A5ADcE"
+  },
+  {
+    "timestamp": "2025-04-22 03:52:58",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Session initiated for subscriber ID-d50BeeB8",
+    "source_ip": "192.168.150.74",
+    "correlation_id": "corr-9BF94C"
+  },
+  {
+    "timestamp": "2025-04-22 03:52:58",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Handover complete for UE ID-5f5CaffF",
+    "source_ip": "192.168.36.216",
+    "correlation_id": "corr-47e7B5"
+  },
+  {
+    "timestamp": "2025-04-22 03:52:58",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Processed 247 packets successfully",
+    "source_ip": "192.168.30.2",
+    "correlation_id": "corr-aF057d"
+  }
+]

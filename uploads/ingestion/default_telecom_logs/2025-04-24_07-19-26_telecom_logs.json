@@ -1,0 +1,98 @@
+[
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Configuration update applied to core-network",
+    "source_ip": "192.168.145.72",
+    "correlation_id": "corr-Ce8682"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Handover complete for UE ID-0D958feA",
+    "source_ip": "192.168.151.153",
+    "correlation_id": "corr-d7927C"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "WARN",
+    "service": "core-network",
+    "message": "Buffer utilization at 91%",
+    "source_ip": "192.168.70.33",
+    "correlation_id": "corr-d3041a"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Configuration update applied to radio-access",
+    "source_ip": "192.168.193.117",
+    "correlation_id": "corr-B8BDeD"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Handover complete for UE ID-6bEA5d0d",
+    "source_ip": "192.168.221.214",
+    "correlation_id": "corr-32fbFe"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "ERROR",
+    "service": "subscriber-db",
+    "message": "Invalid configuration for radio-access",
+    "source_ip": "192.168.94.218",
+    "correlation_id": "corr-dD2C95"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "WARN",
+    "service": "subscriber-db",
+    "message": "Connection pool nearing capacity",
+    "source_ip": "192.168.231.22",
+    "correlation_id": "corr-43A0FE"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Handover complete for UE ID-4eB03eBC",
+    "source_ip": "192.168.130.123",
+    "correlation_id": "corr-784DEC"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Processed 157 packets successfully",
+    "source_ip": "192.168.61.27",
+    "correlation_id": "corr-58e132"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Session initiated for subscriber ID-e7A10feA",
+    "source_ip": "192.168.98.103",
+    "correlation_id": "corr-b034C0"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "WARN",
+    "service": "core-network",
+    "message": "Connection pool nearing capacity",
+    "source_ip": "192.168.254.121",
+    "correlation_id": "corr-dd76DD"
+  },
+  {
+    "timestamp": "2025-04-24 07:19:26",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Processed 248 packets successfully",
+    "source_ip": "192.168.194.124",
+    "correlation_id": "corr-Ab2e60"
+  }
+]

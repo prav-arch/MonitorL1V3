@@ -1,0 +1,106 @@
+[
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "WARN",
+    "service": "packet-gateway",
+    "message": "High latency detected in signaling",
+    "source_ip": "192.168.173.66",
+    "correlation_id": "corr-4b80C9"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Handover complete for UE ID-B83867EC",
+    "source_ip": "192.168.220.173",
+    "correlation_id": "corr-EAdcC2"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "WARN",
+    "service": "core-network",
+    "message": "Connection pool nearing capacity",
+    "source_ip": "192.168.217.96",
+    "correlation_id": "corr-b3c1fD"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Configuration update applied to radio-access",
+    "source_ip": "192.168.64.74",
+    "correlation_id": "corr-16CDF4"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Session initiated for subscriber ID-1D0fe16B",
+    "source_ip": "192.168.63.170",
+    "correlation_id": "corr-8DCfd6"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "WARN",
+    "service": "packet-gateway",
+    "message": "Buffer utilization at 79%",
+    "source_ip": "192.168.158.87",
+    "correlation_id": "corr-cA93BA"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "ERROR",
+    "service": "packet-gateway",
+    "message": "Database query failed: timeout",
+    "source_ip": "192.168.21.179",
+    "correlation_id": "corr-e21953"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Handover complete for UE ID-50748DbC",
+    "source_ip": "192.168.152.139",
+    "correlation_id": "corr-88D8ED"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Connection established to radio-access",
+    "source_ip": "192.168.90.96",
+    "correlation_id": "corr-Dc2bF0"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Processed 698 packets successfully",
+    "source_ip": "192.168.162.22",
+    "correlation_id": "corr-f0Fb96"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Handover complete for UE ID-e2E81b67",
+    "source_ip": "192.168.40.157",
+    "correlation_id": "corr-A12C05"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "ERROR",
+    "service": "subscriber-db",
+    "message": "Failed to connect to core-network",
+    "source_ip": "192.168.39.67",
+    "correlation_id": "corr-91f6cD"
+  },
+  {
+    "timestamp": "2025-04-22 02:52:58",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Configuration update applied to packet-gateway",
+    "source_ip": "192.168.125.218",
+    "correlation_id": "corr-51BA9A"
+  }
+]

@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}Fine-Tuning Dashboard{% endblock %}
+
+{% block fine_tuning_content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <h1 class="mb-4">LLM Fine-Tuning Dashboard</h1>
+            <p class="lead">Fine-tune your AI model with domain-specific training data for improved telecom-specific responses</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card bg-dark border-info shadow-sm h-100">
+                <div class="card-header bg-info bg-opacity-25 text-white">
+                    <h5 class="card-title mb-0">Training Data</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <h6>Available Documents</h6>
+                        <div>
+                            <button id="refreshDocumentsBtn" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-arrow-repeat"></i> Refresh
+                            </button>
+                            <button id="filterDocumentsBtn" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="bi bi-funnel"></i> Filter
+                            </button>
+                            <div class="dropdown-menu p-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="true" id="showProcessedDocs" checked>
+                                    <label class="form-check-label" for="showProcessedDocs">
+                                        Processed Documents
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="true" id="showUnprocessedDocs" checked>
+                                    <label class="form-check-label" for="showUnprocessedDocs">
+                                        Unprocessed Documents
+                                    </label>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="telecom" id="filterTelecomDocs" checked>
+                                    <label class="form-check-label" for="filterTelecomDocs">
+                                        Telecom Content
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="general" id="filterGeneralDocs" checked>
+                                    <label class="form-check-label" for="filterGeneralDocs">
+                                        General Content
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="documentList" class="overflow-auto" style="max-height: 400px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <button id="uploadDocumentBtn" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#uploadDocumentModal">
+                                    <i class="bi bi-cloud-upload"></i> Upload Document
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button id="importWebsiteBtn" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#importWebsiteModal">
+                                    <i class="bi bi-globe"></i> Import Website
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Total Documents: <span id="totalDocumentsCount">0</span></small>
+                        <small class="text-muted">Processed: <span id="processedDocumentsCount">0</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="card bg-dark border-primary shadow-sm h-100">
+                <div class="card-header bg-primary bg-opacity-25 text-white">
+                    <h5 class="card-title mb-0">Fine-Tuning Jobs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <h6>Manage Jobs</h6>
+                        <div>
+                            <button id="refreshJobsBtn" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-arrow-repeat"></i> Refresh
+                            </button>
+                            <button id="newJobBtn" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createJobModal">
+                                <i class="bi bi-plus-circle"></i> New Job
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="jobsList" class="overflow-auto" style="max-height: 400px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Total Jobs: <span id="totalJobsCount">0</span></small>
+                        <small class="text-muted">
+                            <span class="badge bg-success me-1">Completed: <span id="completedJobsCount">0</span></span>
+                            <span class="badge bg-primary me-1">Running: <span id="runningJobsCount">0</span></span>
+                            <span class="badge bg-secondary me-1">Pending: <span id="pendingJobsCount">0</span></span>
+                            <span class="badge bg-danger">Failed: <span id="failedJobsCount">0</span></span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card bg-dark border-success shadow-sm">
+                <div class="card-header bg-success bg-opacity-25 text-white">
+                    <h5 class="card-title mb-0">Available Models</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="availableModels">
+                        <div class="d-flex justify-content-center align-items-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Document Modal -->
+<div class="modal fade" id="uploadDocumentModal" tabindex="-1" aria-labelledby="uploadDocumentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadDocumentModalLabel">Upload Training Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadDocumentForm">
+                    <div class="mb-3">
+                        <label for="documentFile" class="form-label">Select Document</label>
+                        <input type="file" class="form-control" id="documentFile" required>
+                        <div class="form-text">Supported formats: PDF, DOC, DOCX, PPT, PPTX, LOG, TXT</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contentType" class="form-label">Content Type</label>
+                        <select class="form-select" id="contentType" required>
+                            <option value="telecom" selected>Telecom (5G/OpenRAN)</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                </form>
+                <div id="uploadProgress" class="progress mt-3 d-none">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                </div>
+                <div id="uploadResult" class="alert mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="uploadDocumentSubmit">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Job Modal -->
+<div class="modal fade" id="createJobModal" tabindex="-1" aria-labelledby="createJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createJobModalLabel">Create Fine-Tuning Job</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createJobForm">
+                    <div class="mb-3">
+                        <label for="jobName" class="form-label">Job Name</label>
+                        <input type="text" class="form-control" id="jobName" required placeholder="e.g., Telecom-5G-Fine-Tuning">
+                    </div>
+                    <div class="mb-3">
+                        <label for="baseModel" class="form-label">Base Model</label>
+                        <select class="form-select" id="baseModel" required>
+                            <option value="" selected disabled>Select a model...</option>
+                        </select>
+                        <div id="modelWarning" style="display: none;"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="trainingDocuments" class="form-label">Select Training Documents</label>
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush overflow-auto" id="trainingDocumentsList" style="max-height: 200px;">
+                                    <div class="list-group-item text-center">
+                                        <span class="text-muted">Loading available documents...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Advanced Parameters</label>
+                        <div class="accordion" id="advancedParamsAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="advancedParamsHeader">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advancedParamsCollapse">
+                                        Training Parameters (Optional)
+                                    </button>
+                                </h2>
+                                <div id="advancedParamsCollapse" class="accordion-collapse collapse" aria-labelledby="advancedParamsHeader" data-bs-parent="#advancedParamsAccordion">
+                                    <div class="accordion-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="learningRate" class="form-label">Learning Rate</label>
+                                                <input type="number" class="form-control" id="learningRate" value="0.0001" step="0.00001" min="0.00001" max="0.01">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="epochs" class="form-label">Epochs</label>
+                                                <input type="number" class="form-control" id="epochs" value="3" min="1" max="10">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div id="createJobResult" class="alert mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="createJobSubmit">Create Job</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document Details Modal -->
+<div class="modal fade" id="documentDetailsModal" tabindex="-1" aria-labelledby="documentDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="documentDetailsModalLabel">Document Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="documentDetailsContent">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="documentExtractedText" class="mt-3 border p-3 rounded bg-light overflow-auto" style="max-height: 300px; display: none;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="processDocumentBtn" style="display: none;">Process Document</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Website Modal -->
+<div class="modal fade" id="importWebsiteModal" tabindex="-1" aria-labelledby="importWebsiteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importWebsiteModalLabel">Import Website Content</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="importWebsiteForm">
+                    <div class="mb-3">
+                        <label for="websiteUrl" class="form-label">Website URL</label>
+                        <input type="url" class="form-control" id="websiteUrl" required placeholder="https://example.com/page">
+                        <div class="form-text">Enter the full URL of the website you want to extract content from</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="websiteContentType" class="form-label">Content Type</label>
+                        <select class="form-select" id="websiteContentType" required>
+                            <option value="telecom" selected>Telecom (5G/OpenRAN)</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                </form>
+                <div id="websiteImportProgress" class="progress mt-3 d-none">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                </div>
+                <div id="websiteImportResult" class="alert mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="importWebsiteSubmit">Import</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Details Modal -->
+<div class="modal fade" id="jobDetailsModal" tabindex="-1" aria-labelledby="jobDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="jobDetailsModalLabel">Fine-Tuning Job Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="jobDetailsContent">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/fine-tuning.js"></script>
+{% endblock %}

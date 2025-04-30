@@ -1,0 +1,14 @@
+/* Card header text color fix */
+.card-header.bg-light h6 {
+    color: #212529 !important;
+}
+
+/* Dark cards */
+.card {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Card header text colors */
+.card-header h6 {
+    color: #fff !important;
+}

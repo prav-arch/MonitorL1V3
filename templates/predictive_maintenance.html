@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+
+{% block title %}Predictive Maintenance{% endblock %}
+
+{% block predictive_maintenance_content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Network Equipment Health Monitor</h5>
+                </div>
+                <div class="card-body">
+                    <div id="loadingIndicator" class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Analyzing equipment health...</p>
+                    </div>
+                    <div id="analysisContainer" class="d-none">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <h6 class="mb-0 me-3">Equipment Health Overview</h6>
+                                    <span id="lastUpdated" class="text-sm text-muted"></span>
+                                </div>
+                                <div class="chart-container" style="height: 300px;">
+                                    <canvas id="healthOverviewChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <h6 class="mb-0">Failure Mode Distribution</h6>
+                                </div>
+                                <div class="chart-container" style="height: 300px;">
+                                    <canvas id="failureModeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-lg-7">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Maintenance Recommendations</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="recommendationsLoadingIndicator" class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Generating recommendations...</p>
+                    </div>
+                    <div id="noRecommendations" class="text-center p-5 d-none">
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle me-2"></i>
+                            No maintenance actions required at this time. All equipment is operating within normal parameters.
+                        </div>
+                    </div>
+                    <div id="recommendationsContainer" class="d-none">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Component</th>
+                                    <th>Action</th>
+                                    <th>Priority</th>
+                                    <th>Failure Mode</th>
+                                    <th>Scheduled</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recommendationsTableBody">
+                                <!-- Recommendations will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Equipment Status</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="componentStatusLoadingIndicator" class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Retrieving status...</p>
+                    </div>
+                    <div id="componentStatusContainer" class="d-none">
+                        <div class="list-group list-group-flush" id="componentsList">
+                            <!-- Component status will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Maintenance Schedule</h5>
+                    <button id="refreshScheduleBtn" class="btn btn-sm btn-primary">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Refresh Schedule
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="scheduleLoadingIndicator" class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Generating maintenance schedule...</p>
+                    </div>
+                    <div id="noScheduleItems" class="text-center p-5 d-none">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No maintenance activities are currently scheduled.
+                        </div>
+                    </div>
+                    <div id="scheduleContainer" class="d-none">
+                        <div class="mb-3">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span id="scheduleSummary"></span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Component</th>
+                                        <th>Action</th>
+                                        <th>Priority</th>
+                                        <th>Downtime</th>
+                                        <th>Technician</th>
+                                        <th>Parts</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scheduleTableBody">
+                                    <!-- Schedule items will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/kubernetes-pod-charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/kubernetes-monitor.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the page
+        loadPredictiveMaintenanceData();
+        loadMaintenanceSchedule();
+
+        // Add event listener for refresh button
+        document.getElementById('refreshScheduleBtn').addEventListener('click', function() {
+            loadMaintenanceSchedule();
+        });
+    });
+
+    let healthOverviewChart = null;
+    let failureModeChart = null;
+
+    function loadPredictiveMaintenanceData() {
+        // Show loading indicators
+        document.getElementById('loadingIndicator').classList.remove('d-none');
+        document.getElementById('analysisContainer').classList.add('d-none');
+        document.getElementById('recommendationsLoadingIndicator').classList.remove('d-none');
+        document.getElementById('recommendationsContainer').classList.add('d-none');
+        document.getElementById('noRecommendations').classList.add('d-none');
+        document.getElementById('componentStatusLoadingIndicator').classList.remove('d-none');
+        document.getElementById('componentStatusContainer').classList.add('d-none');
+
+        // Fetch predictive maintenance analysis
+        fetch('/api/predictive-maintenance/analysis')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data || !data.timestamp) {
+                    throw new Error('Invalid data structure returned from API');
+                }
+                // Update last updated timestamp
+                const timestamp = new Date(data.timestamp);
+                document.getElementById('lastUpdated').textContent = `Last updated: ${timestamp.toLocaleString()}`;
+
+                // Process healthy, at-risk, and maintenance required components
+                const healthyComponents = data.healthy_components || [];
+                const atRiskComponents = data.at_risk_components || [];
+                const maintenanceRequired = data.maintenance_required || [];
+
+                // Create equipment health overview chart
+                createHealthOverviewChart(healthyComponents.length, atRiskComponents.length, maintenanceRequired.length);
+
+                // Create failure mode distribution chart
+                createFailureModeChart(data);
+
+                // Display component status
+                displayComponentStatus(healthyComponents, atRiskComponents, maintenanceRequired);
+
+                // Display maintenance recommendations
+                displayMaintenanceRecommendations(atRiskComponents, maintenanceRequired, data.recommendations || []);
+
+                // Hide loading indicators and show content
+                document.getElementById('loadingIndicator').classList.add('d-none');
+                document.getElementById('analysisContainer').classList.remove('d-none');
+                document.getElementById('componentStatusLoadingIndicator').classList.add('d-none');
+                document.getElementById('componentStatusContainer').classList.remove('d-none');
+            })
+            .catch(error => {
+                console.error('Error fetching predictive maintenance data:', error);
+                alert('Error loading equipment health data. Please try again later.');
+                // Hide loading indicators
+                document.getElementById('loadingIndicator').classList.add('d-none');
+                document.getElementById('recommendationsLoadingIndicator').classList.add('d-none');
+                document.getElementById('componentStatusLoadingIndicator').classList.add('d-none');
+            });
+    }
+
+    function createHealthOverviewChart(healthyCount, atRiskCount, maintenanceCount) {
+        const ctx = document.getElementById('healthOverviewChart').getContext('2d');
+        
+        // Destroy previous chart if it exists
+        if (healthOverviewChart) {
+            healthOverviewChart.destroy();
+        }
+        
+        healthOverviewChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Healthy', 'At Risk', 'Maintenance Required'],
+                datasets: [{
+                    data: [healthyCount, atRiskCount, maintenanceCount],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',  // Green for healthy
+                        'rgba(255, 193, 7, 0.7)',  // Yellow for at risk
+                        'rgba(220, 53, 69, 0.7)'   // Red for maintenance required
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Equipment Health Status'
+                    }
+                }
+            }
+        });
+    }
+
+    function createFailureModeChart(data) {
+        // Collect all failure modes from at-risk and maintenance required components
+        const allFailureModes = [];
+        
+        // Process maintenance required components
+        if (data.maintenance_required) {
+            data.maintenance_required.forEach(component => {
+                if (component.failure_modes) {
+                    component.failure_modes.forEach(mode => {
+                        allFailureModes.push({
+                            type: mode.type,
+                            confidence: mode.confidence
+                        });
+                    });
+                }
+            });
+        }
+        
+        // Process at-risk components
+        if (data.at_risk_components) {
+            data.at_risk_components.forEach(component => {
+                if (component.failure_modes) {
+                    component.failure_modes.forEach(mode => {
+                        allFailureModes.push({
+                            type: mode.type,
+                            confidence: mode.confidence
+                        });
+                    });
+                }
+            });
+        }
+        
+        // Aggregate failure modes
+        const failureModeMap = {};
+        allFailureModes.forEach(mode => {
+            if (!failureModeMap[mode.type]) {
+                failureModeMap[mode.type] = 0;
+            }
+            failureModeMap[mode.type] += mode.confidence;
+        });
+        
+        // Prepare chart data
+        const labels = [];
+        const values = [];
+        
+        for (const [type, value] of Object.entries(failureModeMap)) {
+            // Format the label to be more readable
+            const formattedType = type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            labels.push(formattedType);
+            values.push(Math.round(value * 100) / 100); // Round to 2 decimal places
+        }
+        
+        // If no failure modes found, add a default entry
+        if (labels.length === 0) {
+            labels.push('No Failures Detected');
+            values.push(1);
+        }
+        
+        const ctx = document.getElementById('failureModeChart').getContext('2d');
+        
+        // Destroy previous chart if it exists
+        if (failureModeChart) {
+            failureModeChart.destroy();
+        }
+        
+        // Create the chart
+        failureModeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Failure Mode Confidence',
+                    data: values,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Failure Mode Distribution'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Confidence Score'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function displayComponentStatus(healthyComponents, atRiskComponents, maintenanceRequired) {
+        const componentsList = document.getElementById('componentsList');
+        componentsList.innerHTML = '';
+        
+        // Display maintenance required components
+        maintenanceRequired.forEach(component => {
+            const healthScore = component.health_score;
+            
+            const item = document.createElement('div');
+            item.className = 'list-group-item list-group-item-action';
+            
+            const content = `
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <h6 class="mb-1">${component.component}</h6>
+                    <span class="badge bg-danger">Critical</span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: ${healthScore}%;" 
+                        aria-valuenow="${healthScore}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="d-block mt-1">Health Score: ${healthScore}%</small>
+                <small class="text-muted d-block mt-1">Estimated failure: ${component.estimated_failure || 'Imminent'}</small>
+            `;
+            
+            item.innerHTML = content;
+            componentsList.appendChild(item);
+        });
+        
+        // Display at-risk components
+        atRiskComponents.forEach(component => {
+            const healthScore = component.health_score;
+            
+            const item = document.createElement('div');
+            item.className = 'list-group-item list-group-item-action';
+            
+            const content = `
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <h6 class="mb-1">${component.component}</h6>
+                    <span class="badge bg-warning text-dark">At Risk</span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: ${healthScore}%;" 
+                        aria-valuenow="${healthScore}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="d-block mt-1">Health Score: ${healthScore}%</small>
+                <small class="text-muted d-block mt-1">Estimated failure: ${component.estimated_failure || 'Medium term'}</small>
+            `;
+            
+            item.innerHTML = content;
+            componentsList.appendChild(item);
+        });
+        
+        // Display healthy components (limited to 5 to save space)
+        const displayedHealthy = healthyComponents.slice(0, 5);
+        
+        displayedHealthy.forEach(component => {
+            const healthScore = component.health_score;
+            
+            const item = document.createElement('div');
+            item.className = 'list-group-item list-group-item-action';
+            
+            const content = `
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <h6 class="mb-1">${component.component}</h6>
+                    <span class="badge bg-success">Healthy</span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: ${healthScore}%;" 
+                        aria-valuenow="${healthScore}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="d-block mt-1">Health Score: ${healthScore}%</small>
+            `;
+            
+            item.innerHTML = content;
+            componentsList.appendChild(item);
+        });
+        
+        // If there are more healthy components than displayed, add a message
+        if (healthyComponents.length > displayedHealthy.length) {
+            const moreItem = document.createElement('div');
+            moreItem.className = 'list-group-item text-center';
+            moreItem.textContent = `+ ${healthyComponents.length - displayedHealthy.length} more healthy components`;
+            componentsList.appendChild(moreItem);
+        }
+    }
+
+    function displayMaintenanceRecommendations(atRiskComponents, maintenanceRequired, recommendations) {
+        const recommendationsTableBody = document.getElementById('recommendationsTableBody');
+        recommendationsTableBody.innerHTML = '';
+        
+        // Hide loading indicator
+        document.getElementById('recommendationsLoadingIndicator').classList.add('d-none');
+        
+        // Check if we have any recommendations
+        if (recommendations.length === 0 && atRiskComponents.length === 0 && maintenanceRequired.length === 0) {
+            document.getElementById('noRecommendations').classList.remove('d-none');
+            return;
+        }
+        
+        // Show the recommendations container
+        document.getElementById('recommendationsContainer').classList.remove('d-none');
+        
+        // Add each recommendation to the table
+        recommendations.forEach(recommendation => {
+            const row = document.createElement('tr');
+            
+            // Set row color based on urgency
+            if (recommendation.urgency === 'high') {
+                row.className = 'table-danger';
+            } else if (recommendation.urgency === 'medium') {
+                row.className = 'table-warning';
+            }
+            
+            // Get primary failure mode (if available)
+            let failureMode = 'Unknown';
+            let failureModeConfidence = 0;
+            
+            if (recommendation.failure_modes && recommendation.failure_modes.length > 0) {
+                const primaryMode = recommendation.failure_modes[0];
+                failureMode = primaryMode.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                failureModeConfidence = primaryMode.confidence;
+            }
+            
+            const content = `
+                <td>${recommendation.component}</td>
+                <td><strong>${recommendation.action.charAt(0).toUpperCase() + recommendation.action.slice(1)}</strong></td>
+                <td>
+                    <span class="badge ${recommendation.urgency === 'high' ? 'bg-danger' : recommendation.urgency === 'medium' ? 'bg-warning text-dark' : 'bg-info'}">
+                        ${recommendation.urgency.charAt(0).toUpperCase() + recommendation.urgency.slice(1)}
+                    </span>
+                </td>
+                <td>
+                    ${failureMode}
+                    ${failureModeConfidence > 0 ? `<small class="text-muted d-block">(${Math.round(failureModeConfidence * 100)}% confidence)</small>` : ''}
+                </td>
+                <td>${recommendation.timing || 'As soon as possible'}</td>
+            `;
+            
+            row.innerHTML = content;
+            recommendationsTableBody.appendChild(row);
+        });
+    }
+
+    function loadMaintenanceSchedule() {
+        // Show loading indicator
+        document.getElementById('scheduleLoadingIndicator').classList.remove('d-none');
+        document.getElementById('scheduleContainer').classList.add('d-none');
+        document.getElementById('noScheduleItems').classList.add('d-none');
+        
+        // Fetch maintenance schedule
+        fetch('/api/predictive-maintenance/schedule')
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading indicator
+                document.getElementById('scheduleLoadingIndicator').classList.add('d-none');
+                
+                const scheduleItems = data.schedule || [];
+                
+                // If no schedule items, show message and return
+                if (scheduleItems.length === 0) {
+                    document.getElementById('noScheduleItems').classList.remove('d-none');
+                    return;
+                }
+                
+                // Show the schedule container
+                document.getElementById('scheduleContainer').classList.remove('d-none');
+                
+                // Update summary
+                document.getElementById('scheduleSummary').textContent = 
+                    `Total estimated downtime: ${data.total_estimated_downtime}`;
+                
+                // Populate table
+                const scheduleTableBody = document.getElementById('scheduleTableBody');
+                scheduleTableBody.innerHTML = '';
+                
+                scheduleItems.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    // Set row color based on priority
+                    if (item.priority === 'high') {
+                        row.className = 'table-danger';
+                    } else if (item.priority === 'medium') {
+                        row.className = 'table-warning';
+                    }
+                    
+                    const content = `
+                        <td>${item.scheduled_date}</td>
+                        <td>${item.component}</td>
+                        <td><strong>${item.action.charAt(0).toUpperCase() + item.action.slice(1)}</strong></td>
+                        <td>
+                            <span class="badge ${item.priority === 'high' ? 'bg-danger' : item.priority === 'medium' ? 'bg-warning text-dark' : 'bg-info'}">
+                                ${item.priority.charAt(0).toUpperCase() + item.priority.slice(1)}
+                            </span>
+                        </td>
+                        <td>${item.estimated_downtime}</td>
+                        <td>${item.technician_required ? '<i class="bi bi-check text-success"></i>' : '<i class="bi bi-x text-muted"></i>'}</td>
+                        <td>${item.parts_required ? '<i class="bi bi-check text-success"></i>' : '<i class="bi bi-x text-muted"></i>'}</td>
+                    `;
+                    
+                    row.innerHTML = content;
+                    scheduleTableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching maintenance schedule:', error);
+                alert('Error loading maintenance schedule. Please try again later.');
+                // Hide loading indicator
+                document.getElementById('scheduleLoadingIndicator').classList.add('d-none');
+            });
+    }
+</script>
+{% endblock %}

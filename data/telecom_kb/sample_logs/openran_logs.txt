@@ -1,0 +1,97 @@
+2025-04-15 05:10:32.123 | INFO | O-DU | Starting O-DU initialization with Cell-ID=12345
+2025-04-15 05:10:32.125 | INFO | O-DU | Loading configuration from /etc/oran/o-du.conf
+2025-04-15 05:10:32.128 | INFO | O-DU | Configuration loaded successfully
+2025-04-15 05:10:32.130 | INFO | O-DU | Initializing fronthaul interface for Cell-ID=12345
+2025-04-15 05:10:32.135 | INFO | O-DU | Starting E2 agent for Near-RT RIC connection
+2025-04-15 05:10:32.138 | INFO | O-DU | E2 agent started successfully, connecting to Near-RT RIC at 10.10.20.30:36421
+2025-04-15 05:10:32.145 | INFO | O-DU | Establishing E2 connection to Near-RT RIC
+2025-04-15 05:10:32.203 | WARN | O-DU | E2 connection attempt 1 failed, retrying...
+2025-04-15 05:10:33.210 | INFO | O-DU | E2 connection established successfully with Near-RT RIC
+2025-04-15 05:10:33.215 | INFO | O-DU | Registering with Near-RT RIC
+2025-04-15 05:10:33.225 | INFO | O-DU | Registration with Near-RT RIC completed
+2025-04-15 05:10:33.230 | INFO | O-DU | Starting F1 interface for O-CU-CP connection
+2025-04-15 05:10:33.235 | INFO | O-DU | F1 interface started, listening on 10.20.30.40:38472
+2025-04-15 05:10:33.240 | INFO | O-DU | Starting F1 interface for O-CU-UP connection
+2025-04-15 05:10:33.245 | INFO | O-DU | F1 interface started, listening on 10.20.30.40:38473
+2025-04-15 05:10:33.250 | INFO | O-DU | Waiting for O-CU-CP connection
+2025-04-15 05:10:33.350 | INFO | O-DU | Received F1 Setup Request from O-CU-CP at 10.20.30.50
+2025-04-15 05:10:33.355 | INFO | O-DU | Processing F1 Setup Request from O-CU-CP
+2025-04-15 05:10:33.360 | INFO | O-DU | Sending F1 Setup Response to O-CU-CP
+2025-04-15 05:10:33.365 | INFO | O-DU | F1-C connection established with O-CU-CP
+2025-04-15 05:10:33.370 | INFO | O-DU | Waiting for O-CU-UP connection
+2025-04-15 05:10:33.470 | INFO | O-DU | Received F1 Setup Request from O-CU-UP at 10.20.30.51
+2025-04-15 05:10:33.475 | INFO | O-DU | Processing F1 Setup Request from O-CU-UP
+2025-04-15 05:10:33.480 | INFO | O-DU | Sending F1 Setup Response to O-CU-UP
+2025-04-15 05:10:33.485 | INFO | O-DU | F1-U connection established with O-CU-UP
+2025-04-15 05:10:33.490 | INFO | O-DU | Starting fronthaul management for O-RU
+2025-04-15 05:10:33.495 | INFO | O-DU | Scanning for available O-RUs
+2025-04-15 05:10:33.550 | INFO | O-DU | Detected O-RU at 10.30.40.50
+2025-04-15 05:10:33.555 | INFO | O-DU | Establishing fronthaul connection to O-RU
+2025-04-15 05:10:33.560 | INFO | O-DU | Starting fronthaul C-plane
+2025-04-15 05:10:33.565 | INFO | O-DU | Fronthaul C-plane started successfully
+2025-04-15 05:10:33.570 | INFO | O-DU | Starting fronthaul U-plane
+2025-04-15 05:10:33.575 | INFO | O-DU | Fronthaul U-plane started successfully
+2025-04-15 05:10:33.580 | INFO | O-DU | Configuring O-RU for Cell-ID=12345
+2025-04-15 05:10:33.585 | INFO | O-DU | O-RU configuration completed successfully
+2025-04-15 05:10:33.590 | INFO | O-DU | Starting cell initialization for Cell-ID=12345
+2025-04-15 05:10:33.595 | INFO | O-DU | Cell initialized successfully
+2025-04-15 05:10:33.600 | INFO | O-DU | Registering cell with O-CU-CP
+2025-04-15 05:10:33.605 | INFO | O-DU | Cell registered with O-CU-CP
+2025-04-15 05:10:33.610 | INFO | O-DU | Starting scheduler for Cell-ID=12345
+2025-04-15 05:10:33.615 | INFO | O-DU | Scheduler started successfully
+2025-04-15 05:10:33.620 | INFO | O-DU | O-DU initialization completed for Cell-ID=12345
+
+2025-04-15 05:15:43.123 | INFO | Near-RT RIC | Starting xApp deployment for Traffic Steering
+2025-04-15 05:15:43.128 | INFO | Near-RT RIC | Loading xApp container image ts-xapp:v1.2.3
+2025-04-15 05:15:43.135 | INFO | Near-RT RIC | Container image loaded successfully
+2025-04-15 05:15:43.140 | INFO | Near-RT RIC | Creating xApp container
+2025-04-15 05:15:43.525 | INFO | Near-RT RIC | xApp container created successfully
+2025-04-15 05:15:43.530 | INFO | Near-RT RIC | Starting Traffic Steering xApp
+2025-04-15 05:15:43.845 | INFO | Near-RT RIC | Traffic Steering xApp started successfully
+2025-04-15 05:15:43.850 | INFO | Near-RT RIC | Registering xApp with E2 Termination
+2025-04-15 05:15:43.855 | INFO | Near-RT RIC | Creating E2 subscriptions for Traffic Steering xApp
+2025-04-15 05:15:43.860 | INFO | Near-RT RIC | E2 subscription created for O-DU Cell-ID=12345 for Traffic Steering xApp
+2025-04-15 05:15:43.865 | INFO | Near-RT RIC | xApp initialization complete, entering monitoring state
+
+2025-04-15 05:20:15.678 | INFO | O-DU | Received E2 message from Near-RT RIC
+2025-04-15 05:20:15.683 | INFO | O-DU | Processing E2 message type: RIC_SUBSCRIPTION_REQUEST
+2025-04-15 05:20:15.688 | INFO | O-DU | E2 subscription request for Traffic Steering xApp
+2025-04-15 05:20:15.693 | INFO | O-DU | Setting up E2 subscription for Cell-ID=12345
+2025-04-15 05:20:15.698 | INFO | O-DU | E2 subscription completed successfully
+2025-04-15 05:20:15.703 | INFO | O-DU | Sending E2 SUBSCRIPTION_RESPONSE to Near-RT RIC
+2025-04-15 05:20:15.708 | INFO | Near-RT RIC | Received E2 SUBSCRIPTION_RESPONSE from O-DU Cell-ID=12345
+2025-04-15 05:20:15.713 | INFO | Near-RT RIC | E2 subscription successful for Traffic Steering xApp
+2025-04-15 05:20:15.718 | INFO | Near-RT RIC | Notifying Traffic Steering xApp about subscription status
+2025-04-15 05:20:15.723 | INFO | Near-RT RIC | Traffic Steering xApp notified, status: active
+
+2025-04-15 05:30:45.987 | INFO | O-DU | Cell-ID=12345 load level changed: HIGH
+2025-04-15 05:30:45.992 | INFO | O-DU | Sending E2 indication to Near-RT RIC for Cell-ID=12345
+2025-04-15 05:30:45.997 | INFO | Near-RT RIC | Received E2 indication from O-DU Cell-ID=12345: CELL_LOAD_HIGH
+2025-04-15 05:30:46.002 | INFO | Near-RT RIC | Forwarding E2 indication to Traffic Steering xApp
+2025-04-15 05:30:46.007 | INFO | Near-RT RIC | Traffic Steering xApp processing cell load indication
+2025-04-15 05:30:46.012 | INFO | Near-RT RIC | Traffic Steering xApp generating control command
+2025-04-15 05:30:46.017 | INFO | Near-RT RIC | Traffic Steering xApp requesting load balancing action
+2025-04-15 05:30:46.022 | INFO | Near-RT RIC | Preparing E2 control message for O-DU Cell-ID=12345
+2025-04-15 05:30:46.027 | INFO | Near-RT RIC | Sending E2 control message to O-DU Cell-ID=12345
+2025-04-15 05:30:46.032 | INFO | O-DU | Received E2 control message from Near-RT RIC
+2025-04-15 05:30:46.037 | INFO | O-DU | Processing E2 control message: LOAD_BALANCING_REQUEST
+2025-04-15 05:30:46.042 | ERROR | O-DU | Failed to execute load balancing: insufficient resources
+2025-04-15 05:30:46.047 | INFO | O-DU | Sending E2 control outcome with failure to Near-RT RIC
+2025-04-15 05:30:46.052 | INFO | Near-RT RIC | Received E2 control outcome from O-DU Cell-ID=12345: FAILURE
+2025-04-15 05:30:46.057 | WARN | Near-RT RIC | Traffic Steering xApp load balancing action failed
+2025-04-15 05:30:46.062 | INFO | Near-RT RIC | Notifying Non-RT RIC about failed load balancing action
+2025-04-15 05:30:46.067 | INFO | Near-RT RIC | Retrying with alternative load balancing strategy
+2025-04-15 05:30:46.072 | INFO | Near-RT RIC | Preparing E2 control message with reduced parameters
+2025-04-15 05:30:46.077 | INFO | Near-RT RIC | Sending modified E2 control message to O-DU Cell-ID=12345
+2025-04-15 05:30:46.082 | INFO | O-DU | Received E2 control message from Near-RT RIC
+2025-04-15 05:30:46.087 | INFO | O-DU | Processing E2 control message: LOAD_BALANCING_REQUEST
+2025-04-15 05:30:46.092 | INFO | O-DU | Executing load balancing with reduced parameters
+2025-04-15 05:30:46.097 | INFO | O-DU | Load balancing execution successful
+2025-04-15 05:30:46.102 | INFO | O-DU | Sending E2 control outcome with success to Near-RT RIC
+2025-04-15 05:30:46.107 | INFO | Near-RT RIC | Received E2 control outcome from O-DU Cell-ID=12345: SUCCESS
+2025-04-15 05:30:46.112 | INFO | Near-RT RIC | Traffic Steering xApp load balancing action successful
+2025-04-15 05:30:46.117 | INFO | Near-RT RIC | Updating status in Non-RT RIC
+2025-04-15 05:30:46.122 | INFO | O-DU | Cell-ID=12345 load level changed: MEDIUM
+2025-04-15 05:30:46.127 | INFO | O-DU | Sending E2 indication to Near-RT RIC for Cell-ID=12345
+2025-04-15 05:30:46.132 | INFO | Near-RT RIC | Received E2 indication from O-DU Cell-ID=12345: CELL_LOAD_MEDIUM
+2025-04-15 05:30:46.137 | INFO | Near-RT RIC | Load balancing operation completed successfully

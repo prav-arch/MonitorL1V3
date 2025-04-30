@@ -1,0 +1,69 @@
+{
+  "events": [
+    {
+      "count": 1,
+      "first_timestamp": "2025-04-25T15:25:09.812150",
+      "involved_object": {
+        "kind": "Pod",
+        "name": "l1-monitoring-5d4f8b9d6c-2xlpn",
+        "namespace": "default"
+      },
+      "last_timestamp": "2025-04-25T15:25:09.812156",
+      "message": "Started container l1-monitoring-app",
+      "reason": "Started",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "first_timestamp": "2025-04-25T15:24:49.812159",
+      "involved_object": {
+        "kind": "Pod",
+        "name": "l1-monitoring-5d4f8b9d6c-2xlpn",
+        "namespace": "default"
+      },
+      "last_timestamp": "2025-04-25T15:24:49.812161",
+      "message": "Container image pulled successfully",
+      "reason": "Pulled",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "first_timestamp": "2025-04-25T15:24:36.812163",
+      "involved_object": {
+        "kind": "Pod",
+        "name": "clickhouse-server-3f2b9c8f7e-1hxnp",
+        "namespace": "default"
+      },
+      "last_timestamp": "2025-04-25T15:24:36.812165",
+      "message": "Pulling image clickhouse/clickhouse-server:23.3",
+      "reason": "Pulling",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "first_timestamp": "2025-04-25T15:23:20.812167",
+      "involved_object": {
+        "kind": "Deployment",
+        "name": "l1-monitoring",
+        "namespace": "default"
+      },
+      "last_timestamp": "2025-04-25T15:23:20.812169",
+      "message": "Scaled up replica set l1-monitoring-5d4f8b9d6c to 1",
+      "reason": "ScalingReplicaSet",
+      "type": "Normal"
+    },
+    {
+      "count": 1,
+      "first_timestamp": "2025-04-25T15:23:12.812171",
+      "involved_object": {
+        "kind": "Deployment",
+        "name": "clickhouse-server",
+        "namespace": "default"
+      },
+      "last_timestamp": "2025-04-25T15:23:12.812173",
+      "message": "Scaled up replica set clickhouse-server-3f2b9c8f7e to 1",
+      "reason": "ScalingReplicaSet", 
+      "type": "Normal"
+    }
+  ]
+}

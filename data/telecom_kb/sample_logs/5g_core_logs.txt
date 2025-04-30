@@ -1,0 +1,111 @@
+2025-04-15 05:10:32.123 | INFO | AMF | Starting AMF initialization for slice NSSAI=1
+2025-04-15 05:10:32.125 | INFO | AMF | Loading configuration from /etc/5gc/amf.conf
+2025-04-15 05:10:32.128 | INFO | AMF | Configuration loaded successfully
+2025-04-15 05:10:32.130 | INFO | AMF | Initializing SCTP interface for N2
+2025-04-15 05:10:32.135 | INFO | AMF | Starting N1/N2 traffic handlers
+2025-04-15 05:10:32.138 | INFO | AMF | N1/N2 traffic handlers started successfully
+2025-04-15 05:10:32.145 | INFO | AMF | Setting up N8 interface to UDM
+2025-04-15 05:10:32.203 | WARN | AMF | N8 connection attempt 1 to UDM failed, retrying...
+2025-04-15 05:10:33.210 | INFO | AMF | N8 connection established successfully with UDM
+2025-04-15 05:10:33.215 | INFO | AMF | Setting up N12 interface to AUSF
+2025-04-15 05:10:33.225 | INFO | AMF | N12 connection established successfully with AUSF
+2025-04-15 05:10:33.230 | INFO | AMF | Setting up N11 interface to SMF
+2025-04-15 05:10:33.235 | INFO | AMF | N11 connection established successfully with SMF
+2025-04-15 05:10:33.240 | INFO | AMF | Setting up N15 interface to PCF
+2025-04-15 05:10:33.245 | INFO | AMF | N15 connection established successfully with PCF
+2025-04-15 05:10:33.250 | INFO | AMF | Setting up service-based interface with NRF
+2025-04-15 05:10:33.350 | INFO | AMF | Registered with NRF successfully
+2025-04-15 05:10:33.355 | INFO | AMF | AMF initialization completed, ready to process UE requests
+2025-04-15 05:10:33.360 | INFO | AMF | Starting heartbeat monitoring with NRF
+2025-04-15 05:10:33.365 | INFO | AMF | Starting heartbeat monitoring with SMF
+2025-04-15 05:10:33.370 | INFO | AMF | Starting heartbeat monitoring with UDM
+2025-04-15 05:10:33.470 | INFO | AMF | UE Registration request received: SUPI=imsi-310150123456789
+2025-04-15 05:10:33.475 | INFO | AMF | Authentication procedure started for SUPI=imsi-310150123456789
+2025-04-15 05:10:33.480 | INFO | AMF | Sending authentication request to AUSF for SUPI=imsi-310150123456789
+2025-04-15 05:10:33.485 | INFO | AUSF | Authentication request received for SUPI=imsi-310150123456789
+2025-04-15 05:10:33.490 | INFO | AUSF | Requesting authentication vector from UDM
+2025-04-15 05:10:33.495 | INFO | UDM | Authentication vector request received for SUPI=imsi-310150123456789
+2025-04-15 05:10:33.550 | INFO | UDM | Authentication vector generated successfully
+2025-04-15 05:10:33.555 | INFO | UDM | Sending authentication vector to AUSF
+2025-04-15 05:10:33.560 | INFO | AUSF | Authentication vector received from UDM
+2025-04-15 05:10:33.565 | INFO | AUSF | Authentication response sent to AMF
+2025-04-15 05:10:33.570 | INFO | AMF | Authentication challenge sent to UE: SUPI=imsi-310150123456789
+2025-04-15 05:10:33.575 | INFO | AMF | Authentication response received from UE: SUPI=imsi-310150123456789
+2025-04-15 05:10:33.580 | INFO | AMF | Sending authentication result to AUSF
+2025-04-15 05:10:33.585 | INFO | AUSF | Authentication result verification successful
+2025-04-15 05:10:33.590 | INFO | AMF | Authentication procedure completed successfully
+2025-04-15 05:10:33.595 | INFO | AMF | Registration procedure continuing for SUPI=imsi-310150123456789
+2025-04-15 05:10:33.600 | INFO | AMF | Requesting subscription data from UDM
+2025-04-15 05:10:33.605 | INFO | UDM | Subscription data request received for SUPI=imsi-310150123456789
+2025-04-15 05:10:33.610 | INFO | UDM | Subscription data retrieved from UDR
+2025-04-15 05:10:33.615 | INFO | UDM | Sending subscription data to AMF
+2025-04-15 05:10:33.620 | INFO | AMF | Subscription data received from UDM
+
+2025-04-15 05:15:43.123 | INFO | AMF | PDU Session Establishment Request received: SUPI=imsi-310150123456789, PDU Session ID=1
+2025-04-15 05:15:43.128 | INFO | AMF | Requesting SM context creation from SMF
+2025-04-15 05:15:43.135 | INFO | SMF | SM context creation request received
+2025-04-15 05:15:43.140 | INFO | SMF | SM context created for PDU session ID=1
+2025-04-15 05:15:43.525 | INFO | SMF | Requesting policy information from PCF
+2025-04-15 05:15:43.530 | INFO | PCF | Policy request received for SUPI=imsi-310150123456789
+2025-04-15 05:15:43.845 | INFO | PCF | Policy decision created successfully
+2025-04-15 05:15:43.850 | INFO | PCF | Sending policy decision to SMF
+2025-04-15 05:15:43.855 | INFO | SMF | Policy information received from PCF
+2025-04-15 05:15:43.860 | INFO | SMF | Selecting UPF for PDU session
+2025-04-15 05:15:43.865 | INFO | SMF | UPF selection completed: UPF ID=upf-east-1
+2025-04-15 05:15:43.870 | INFO | SMF | Setting up N4 session with UPF
+2025-04-15 05:15:43.875 | INFO | UPF | N4 session establishment request received from SMF
+2025-04-15 05:15:43.880 | INFO | UPF | Creating PFCP session
+2025-04-15 05:15:43.885 | INFO | UPF | PFCP session created successfully
+2025-04-15 05:15:43.890 | INFO | UPF | Sending N4 session establishment response to SMF
+2025-04-15 05:15:43.895 | INFO | SMF | N4 session established successfully with UPF
+2025-04-15 05:15:43.900 | INFO | SMF | Sending SM context response to AMF
+2025-04-15 05:15:43.905 | INFO | AMF | SM context response received from SMF
+2025-04-15 05:15:43.910 | INFO | AMF | Sending PDU session establishment accept to UE
+
+2025-04-15 05:20:15.678 | ERROR | UPF | N4 heartbeat timeout from SMF
+2025-04-15 05:20:15.683 | WARN | UPF | Attempting to re-establish N4 connection with SMF
+2025-04-15 05:20:15.688 | INFO | UPF | N4 connection re-established successfully with SMF
+2025-04-15 05:20:15.693 | INFO | SMF | N4 heartbeat monitoring resumed with UPF
+2025-04-15 05:20:15.698 | INFO | AMF | UE mobility event detected: SUPI=imsi-310150123456789
+2025-04-15 05:20:15.703 | INFO | AMF | Handover procedure started
+2025-04-15 05:20:15.708 | INFO | AMF | Target gNB ID=gnb-123457
+2025-04-15 05:20:15.713 | INFO | AMF | Preparing handover request to target gNB
+2025-04-15 05:20:15.718 | INFO | AMF | Handover request sent to target gNB
+2025-04-15 05:20:15.723 | INFO | AMF | Handover request acknowledgement received from target gNB
+2025-04-15 05:20:15.728 | INFO | AMF | Sending handover command to source gNB
+2025-04-15 05:20:15.733 | INFO | AMF | Handover notify received from target gNB
+2025-04-15 05:20:15.738 | INFO | AMF | Handover procedure completed successfully
+2025-04-15 05:20:15.743 | INFO | AMF | Path switch procedure completed
+2025-04-15 05:20:15.748 | INFO | AMF | UE Context updated with new gNB information
+
+2025-04-15 05:30:45.987 | INFO | AMF | UE Periodic Registration Update received: SUPI=imsi-310150123456789
+2025-04-15 05:30:45.992 | INFO | AMF | Verifying UE context for SUPI=imsi-310150123456789
+2025-04-15 05:30:45.997 | INFO | AMF | UE context verified successfully
+2025-04-15 05:30:46.002 | INFO | AMF | Updating UE Registration with UDM
+2025-04-15 05:30:46.007 | INFO | UDM | UE Registration update received from AMF
+2025-04-15 05:30:46.012 | INFO | UDM | Updating UE registration state in UDR
+2025-04-15 05:30:46.017 | INFO | UDM | UE registration state updated successfully
+2025-04-15 05:30:46.022 | INFO | UDM | Registration update response sent to AMF
+2025-04-15 05:30:46.027 | INFO | AMF | Registration Update procedure completed
+2025-04-15 05:30:46.032 | ERROR | AMF | Service request failed: SUPI=imsi-310150123456789, Service Type=data
+2025-04-15 05:30:46.037 | ERROR | AMF | N2 connection failed during service request
+2025-04-15 05:30:46.042 | WARN | AMF | Radio link failure detected for SUPI=imsi-310150123456789
+2025-04-15 05:30:46.047 | INFO | AMF | Starting service recovery procedure
+2025-04-15 05:30:46.052 | INFO | AMF | Paging UE: SUPI=imsi-310150123456789
+2025-04-15 05:30:46.057 | INFO | AMF | Paging response received from UE
+2025-04-15 05:30:46.062 | INFO | AMF | Re-establishing N2 connection
+2025-04-15 05:30:46.067 | INFO | AMF | N2 connection re-established successfully
+2025-04-15 05:30:46.072 | INFO | AMF | Service request procedure completed
+2025-04-15 05:30:46.077 | INFO | AMF | PDU sessions reactivated: [1]
+2025-04-15 05:30:46.082 | INFO | SMF | PDU session reactivation for Session ID=1
+2025-04-15 05:30:46.087 | INFO | SMF | N4 session modification for UPF
+2025-04-15 05:30:46.092 | INFO | UPF | N4 session modified successfully
+2025-04-15 05:30:46.097 | INFO | SMF | PDU session restored successfully
+2025-04-15 05:30:46.102 | INFO | SMF | QoS flow restored for PDU session ID=1
+2025-04-15 05:30:46.107 | INFO | AMF | Service recovery procedure completed successfully
+2025-04-15 05:30:46.112 | INFO | SMF | Data path established for UE: SUPI=imsi-310150123456789
+2025-04-15 05:30:46.117 | INFO | UPF | User plane path established for PDU session ID=1
+2025-04-15 05:30:46.122 | INFO | UPF | Starting user plane traffic measurement
+2025-04-15 05:30:46.127 | INFO | PCF | UE policy update triggered
+2025-04-15 05:30:46.132 | INFO | PCF | Policy update notification sent to SMF
+2025-04-15 05:30:46.137 | INFO | SMF | Policy update received from PCF

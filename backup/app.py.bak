@@ -1,0 +1,1474 @@
+import os
+import logging
+from dotenv import load_dotenv
+from flask import Flask, render_template, request, jsonify, Response
+from flask_cors import CORS
+
+# Load environment variables from .env file
+load_dotenv()
+import config
+from utils.log_processor import LogProcessor
+from utils.rag_engine import RAGEngine
+from utils.llm_interface import LLMInterface
+from utils.vector_store import VectorStore
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# Initialize Flask app
+app = Flask(__name__)
+app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
+CORS(app)
+
+# Import database models and utilities
+from database_models import DBLogEntry, get_db_session
+from sqlalchemy import func
+import db_init
+import traceback
+
+# Initialize database (this handles sample data as well)
+db_init.initialize_database()
+
+# Initialize components
+vector_store = VectorStore(index_path=config.VECTOR_DB_PATH)
+llm_interface = LLMInterface(model_name=config.OLLAMA_MODEL)
+log_processor = LogProcessor(embedding_model_name=config.EMBEDDING_MODEL)
+rag_engine = RAGEngine(vector_store=vector_store, llm_interface=llm_interface)
+
+# Initialize telecom components
+try:
+    from utils.telecom_integration import TelecomIntegration
+    telecom_integration = TelecomIntegration(
+        base_log_processor=log_processor,
+        base_rag_engine=rag_engine
+    )
+    if telecom_integration.is_healthy():
+        logger.info("Telecom components initialized successfully")
+    else:
+        logger.warning("Telecom components initialized but not healthy")
+except Exception as e:
+    logger.error(f"Failed to initialize telecom components: {e}")
+    telecom_integration = None
+
+# Sample logs for fallback if database fails
+SAMPLE_LOGS = db_init.SAMPLE_LOGS
+
+@app.route('/')
+def index():
+    """Render the main application page"""
+    return render_template('index.html')
+
+@app.route('/telecom-health')
+def telecom_health_dashboard():
+    """Render the telecom health dashboard page"""
+    return render_template('telecom_health.html')
+
+@app.route('/ai-assistant')
+def ai_assistant():
+    """Render the AI Assistant page"""
+    return render_template('ai_assistant.html')
+
+@app.route('/fine-tuning')
+def fine_tuning():
+    """Render the Fine-Tuning dashboard page"""
+    return render_template('fine_tuning.html')
+
+@app.route('/api/logs', methods=['GET'])
+def get_logs():
+    """API endpoint to retrieve logs from database"""
+    try:
+        session = get_db_session()
+        # Get logs from database with pagination
+        limit = request.args.get('limit', default=100, type=int)
+        offset = request.args.get('offset', default=0, type=int)
+        level_filter = request.args.get('level', default=None)
+        service_filter = request.args.get('service', default=None)
+        
+        # Build query
+        query = session.query(DBLogEntry)
+        
+        # Apply filters if provided
+        if level_filter:
+            query = query.filter(DBLogEntry.level == level_filter)
+        if service_filter:
+            query = query.filter(DBLogEntry.service == service_filter)
+            
+        # Order by timestamp descending and apply pagination
+        logs = query.order_by(DBLogEntry.timestamp.desc()).limit(limit).offset(offset).all()
+        
+        # Convert to dictionary
+        result = [log.to_dict() for log in logs]
+        
+        # If no logs were found even after querying, use the sample logs
+        if not result:
+            logger.warning("No logs found in database, using sample logs as fallback")
+            result = SAMPLE_LOGS
+            
+        session.close()
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error fetching logs from database: {str(e)}")
+        logger.error(traceback.format_exc())
+        # Fallback to sample logs if database fails
+        return jsonify(SAMPLE_LOGS)
+
+@app.route('/api/logs/upload', methods=['POST'])
+def upload_logs():
+    """API endpoint to upload and process log files or training documents"""
+    if 'logfile' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    
+    file = request.files['logfile']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+    
+    # Get the file extension
+    filename = file.filename
+    file_extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else None
+    
+    # Create a secure filename to avoid path traversal
+    from werkzeug.utils import secure_filename
+    secure_name = secure_filename(filename)
+    
+    # Define allowed file types
+    log_extensions = ['log', 'txt']
+    document_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx']
+    
+    # Process the file based on its type
+    try:
+        # Save original file to disk regardless of type for training purposes
+        import os
+        import time
+        
+        # Create timestamped filename to avoid collisions
+        timestamp = str(int(time.time()))
+        timestamped_name = f"{timestamp}_{secure_name}"
+        file_path = os.path.join('uploads/documents', timestamped_name)
+        
+        # Save the file to disk
+        file.save(file_path)
+        logger.info(f"Saved uploaded file to {file_path}")
+        
+        # For log files, additionally process the content and save to database
+        if file_extension in log_extensions:
+            # Re-open the saved file to process it
+            with open(file_path, 'r', encoding='utf-8') as f:
+                log_content = f.read()
+            
+            log_entries = log_processor.parse_logs(log_content)
+            
+            # Process logs for vector embeddings
+            log_processor.process_logs_for_embeddings(log_entries, vector_store)
+            
+            # Save logs to database
+            session = get_db_session()
+            saved_count = 0
+            
+            for log_entry in log_entries:
+                # Create database model from log entry
+                db_log = DBLogEntry(
+                    timestamp=log_entry.timestamp,
+                    level=log_entry.level,
+                    message=log_entry.message,
+                    service=log_entry.service,
+                    additional_fields=log_entry.additional_fields
+                )
+                session.add(db_log)
+                saved_count += 1
+                
+                # Commit in batches to avoid memory issues
+                if saved_count % 100 == 0:
+                    session.commit()
+            
+            # Final commit for remaining logs
+            session.commit()
+            session.close()
+            
+            logger.info(f"Saved {saved_count} logs to database")
+            
+            # Return result for log files
+            return jsonify({
+                "message": f"Log file processed successfully. {saved_count} logs saved to database.",
+                "log_count": len(log_entries),
+                "logs": [log.to_dict() for log in log_entries[:100]],  # Return first 100 logs for display
+                "file_path": file_path
+            })
+            
+        # For document files, register them for fine-tuning
+        elif file_extension in document_extensions:
+            # Register the document for fine-tuning
+            training_doc = None
+            try:
+                from utils.fine_tuning import TrainingDataProcessor
+                data_processor = TrainingDataProcessor()
+                
+                # Determine content type (telecom or general)
+                content_type = request.form.get('content_type', 'telecom')
+                
+                training_doc = data_processor.register_document(
+                    document_path=file_path,
+                    document_type=file_extension,
+                    content_type=content_type
+                )
+                
+                if training_doc:
+                    logger.info(f"Registered document for fine-tuning: {file_path}")
+            except Exception as e:
+                logger.warning(f"Failed to register document for fine-tuning: {str(e)}")
+            
+            response_data = {
+                "success": True,
+                "message": f"Successfully saved document file for training",
+                "file_type": file_extension,
+                "file_path": file_path
+            }
+            
+            if training_doc:
+                response_data["registered_for_fine_tuning"] = True
+                response_data["training_document_id"] = training_doc.id
+                response_data["content_type"] = content_type
+            
+            return jsonify(response_data)
+            
+        else:
+            # For unsupported file types, still save but show a warning
+            return jsonify({
+                "warning": f"Unsupported file type: .{file_extension}. File saved but not processed.",
+                "supported_types": log_extensions + document_extensions,
+                "file_path": file_path
+            }), 200
+            
+    except Exception as e:
+        logger.error(f"Error processing file: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": f"Failed to process file: {str(e)}"}), 500
+
+@app.route('/api/analyze', methods=['POST'])
+def analyze_logs():
+    """API endpoint to analyze logs and provide suggestions"""
+    data = request.json
+    if not data or 'query' not in data:
+        return jsonify({"error": "No query provided"}), 400
+    
+    query = data['query']
+    selected_logs = data.get('selected_logs', [])
+    
+    try:
+        # Retrieve relevant log context using RAG
+        context_logs = rag_engine.retrieve_relevant_logs(query, top_k=5)
+        
+        # If specific logs were selected by the user, add them to the context
+        if selected_logs:
+            context_logs.extend(selected_logs)
+        
+        # Generate suggestion using the LLM and retrieved context
+        suggestion = rag_engine.generate_suggestion(query, context_logs)
+        
+        return jsonify({
+            "suggestion": suggestion,
+            "relevant_logs": context_logs
+        })
+    except Exception as e:
+        logger.error(f"Error analyzing logs: {str(e)}")
+        return jsonify({"error": f"Failed to analyze logs: {str(e)}"}), 500
+
+@app.route('/api/logs/stats', methods=['GET'])
+def get_log_stats():
+    """API endpoint to retrieve statistics about logs from database"""
+    try:
+        session = get_db_session()
+        
+        # Get total count
+        total_count = session.query(DBLogEntry).count()
+        
+        # Get count by log level
+        level_counts = {}
+        level_results = session.query(DBLogEntry.level, 
+                                  func.count(DBLogEntry.id))\
+                          .group_by(DBLogEntry.level)\
+                          .all()
+        for level, count in level_results:
+            level_counts[level] = count
+            
+        # Get count by service
+        service_counts = {}
+        service_results = session.query(DBLogEntry.service, 
+                                    func.count(DBLogEntry.id))\
+                            .group_by(DBLogEntry.service)\
+                            .all()
+        for service, count in service_results:
+            service_name = service or "unknown"
+            service_counts[service_name] = count
+            
+        # Get timeline data (most recent 24 hours)
+        # For this mock version, we'll generate a simple timeline
+        # In a production system, we would use SQL to group by hour
+        timeline = []
+        for hour in range(24):
+            timestamp = f"2023-10-15T{hour:02d}:00:00"
+            # Just distribute the logs across the hours for demo
+            count = total_count // 24
+            if hour % 3 == 0:  # Every 3rd hour has more logs for variation
+                count = int(count * 1.5)
+            timeline.append({"timestamp": timestamp, "count": count})
+        
+        # Get a subset of recent logs for ML anomaly analysis
+        recent_logs = session.query(DBLogEntry).order_by(DBLogEntry.timestamp.desc()).limit(500).all()
+        log_entries = [DBLogEntry.to_log_entry(log) for log in recent_logs]
+        
+        # Generate anomaly stats with ML detection
+        if log_entries:
+            anomaly_info = log_processor.detect_anomalies(log_entries)
+        else:
+            anomaly_info = {
+                "total_anomalies": 0,
+                "mild_anomalies": 0,
+                "rule_based_detected": 0,
+                "ml_model_trained": False,
+                "anomalous_logs": [],
+                "mild_anomalous_logs": [],
+                "anomaly_patterns": []
+            }
+            
+        session.close()
+        
+        # Assemble stats
+        stats = {
+            "total": total_count,
+            "by_level": level_counts,
+            "by_service": service_counts,
+            "timeline": timeline,
+            "anomalies": {
+                "total": anomaly_info["total_anomalies"] + anomaly_info["mild_anomalies"],
+                "critical": anomaly_info["total_anomalies"],
+                "mild": anomaly_info["mild_anomalies"],
+                "rule_based": anomaly_info["rule_based_detected"],
+                "ml_trained": anomaly_info["ml_model_trained"],
+                "patterns": anomaly_info["anomaly_patterns"]
+            }
+        }
+        
+        return jsonify(stats)
+    except Exception as e:
+        logger.error(f"Error generating log stats: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        # Fallback to sample data if database query fails
+        return jsonify({
+            "total": 5,  # The sample logs we added
+            "by_level": {
+                "ERROR": 2,
+                "WARN": 1,
+                "INFO": 2
+            },
+            "by_service": {
+                "database": 4,
+                "api": 1
+            },
+            "timeline": [
+                {"timestamp": "2023-10-15T12:00:00", "count": 5}
+            ],
+            "anomalies": {
+                "total": 2,
+                "critical": 1,
+                "mild": 1,
+                "rule_based": 2,
+                "ml_trained": False,
+                "patterns": []
+            }
+        })
+
+@app.route('/api/logs/anomalies', methods=['GET'])
+def get_log_anomalies():
+    """API endpoint to retrieve detected anomalies in logs"""
+    try:
+        session = get_db_session()
+        
+        # Get limit from query parameters with default
+        limit = request.args.get('limit', default=100, type=int)
+        
+        # Get recent logs for analysis
+        recent_logs = session.query(DBLogEntry).order_by(DBLogEntry.timestamp.desc()).limit(500).all()
+        log_entries = [DBLogEntry.to_log_entry(log) for log in recent_logs]
+        
+        # Detect anomalies using ML and rule-based approaches
+        anomaly_info = log_processor.detect_anomalies(log_entries)
+        
+        # Combine critical and mild anomalies, sorted by score (highest first)
+        all_anomalies = anomaly_info["anomalous_logs"] + anomaly_info["mild_anomalous_logs"]
+        all_anomalies.sort(key=lambda x: x.get("anomaly_score", 0), reverse=True)
+        
+        # Limit the number of anomalies returned
+        limited_anomalies = all_anomalies[:limit]
+        
+        # Generate AI-based explanation for the anomalies (if we have anomalies)
+        explanation = ""
+        if limited_anomalies and llm_interface.is_healthy():
+            # Construct a prompt with the detected anomalies
+            anomaly_examples = "\n".join([
+                f"- {a.get('level', 'INFO')}: {a.get('message', 'No message')} (Score: {a.get('anomaly_score', 0):.2f})"
+                for a in limited_anomalies[:5]  # Only include a few examples to keep prompt short
+            ])
+            
+            patterns_text = ""
+            if anomaly_info["anomaly_patterns"]:
+                patterns_text = "\nDetected patterns in anomalies:\n" + "\n".join([
+                    f"- {p.get('explanation', 'Unknown pattern')}"
+                    for p in anomaly_info["anomaly_patterns"]
+                ])
+            
+            prompt = f"""
+            Analyze these log anomalies detected in the system and provide a brief explanation 
+            of what might be happening based on these patterns. Keep your explanation concise.
+            
+            Recent anomalies detected:
+            {anomaly_examples}
+            {patterns_text}
+            
+            Based on these anomalies, what might be happening in the system?
+            """
+            
+            try:
+                explanation = llm_interface.generate_text(prompt.strip())
+            except Exception as e:
+                logger.error(f"Error generating anomaly explanation: {str(e)}")
+                explanation = "Could not generate explanation due to LLM service error."
+        
+        session.close()
+        
+        # Return anomalies with explanation
+        return jsonify({
+            "total_anomalies": anomaly_info["total_anomalies"],
+            "mild_anomalies": anomaly_info["mild_anomalies"],
+            "ml_trained": anomaly_info["ml_model_trained"],
+            "anomalies": limited_anomalies,
+            "patterns": anomaly_info["anomaly_patterns"],
+            "ai_explanation": explanation
+        })
+    except Exception as e:
+        logger.error(f"Error retrieving anomalies: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        # Fallback if error occurs
+        return jsonify({
+            "total_anomalies": 0,
+            "mild_anomalies": 0,
+            "ml_trained": False,
+            "anomalies": [],
+            "patterns": [],
+            "ai_explanation": "Could not analyze anomalies due to an error."
+        }), 500
+
+@app.route('/api/telecom/analyze', methods=['POST'])
+def analyze_telecom_logs():
+    """API endpoint to analyze telecom logs and provide domain-specific suggestions"""
+    # Check if telecom components are available
+    if not telecom_integration or not telecom_integration.is_healthy():
+        return jsonify({
+            "error": "Telecom components not available",
+            "suggestion": "Telecom-specific analysis not available",
+            "domain": "unknown"
+        }), 400
+        
+    data = request.json
+    if not data or 'query' not in data:
+        return jsonify({"error": "No query provided"}), 400
+        
+    query = data['query']
+    selected_logs = data.get('selected_logs', [])
+    
+    try:
+        # Analyze logs with telecom-specific components
+        result = telecom_integration.analyze_telecom_logs(query, selected_logs)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error analyzing telecom logs: {str(e)}")
+        return jsonify({
+            "error": f"Failed to analyze telecom logs: {str(e)}",
+            "query": query,
+            "domain": "unknown"
+        }), 500
+
+@app.route('/api/telecom/logs/upload', methods=['POST'])
+def upload_telecom_logs():
+    """API endpoint to upload and process telecom-specific log files"""
+    # Check if telecom components are available
+    if not telecom_integration or not telecom_integration.is_healthy():
+        return jsonify({
+            "error": "Telecom components not available"
+        }), 400
+        
+    if 'logfile' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+        
+    file = request.files['logfile']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+    
+    # Get the file extension
+    filename = file.filename
+    file_extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else None
+    
+    # Create a secure filename to avoid path traversal
+    from werkzeug.utils import secure_filename
+    secure_name = secure_filename(filename)
+    
+    # Save file to disk regardless of type
+    try:
+        # Save original file to disk for training purposes
+        import os
+        import time
+        
+        # Create timestamped filename to avoid collisions
+        timestamp = str(int(time.time()))
+        timestamped_name = f"{timestamp}_telecom_{secure_name}"
+        file_path = os.path.join('uploads/documents', timestamped_name)
+        
+        # Save the file to disk
+        file.save(file_path)
+        logger.info(f"Saved uploaded telecom file to {file_path}")
+        
+        # Process the telecom log file if it has a log extension
+        log_extensions = ['log', 'txt']
+        document_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx']
+        
+        if file_extension in log_extensions:
+            # Re-open the saved file to process it
+            with open(file_path, 'r', encoding='utf-8') as f:
+                log_content = f.read()
+            
+            # Parse logs with telecom-specific parser
+            log_entries = telecom_integration.parse_telecom_logs(log_content)
+            
+            if not log_entries:
+                return jsonify({
+                    "warning": "No valid telecom logs found in the file",
+                    "file_path": file_path
+                }), 200
+                
+            # Process logs for vector embeddings
+            log_processor.process_logs_for_embeddings(log_entries, vector_store)
+            
+            # Save logs to database
+            session = get_db_session()
+            saved_count = 0
+            
+            for log_entry in log_entries:
+                # Create database model from log entry
+                db_log = DBLogEntry(
+                    timestamp=log_entry.timestamp,
+                    level=log_entry.level,
+                    message=log_entry.message,
+                    service=log_entry.service,
+                    additional_fields=log_entry.additional_fields
+                )
+                session.add(db_log)
+                saved_count += 1
+                
+                # Commit in batches to avoid memory issues
+                if saved_count % 100 == 0:
+                    session.commit()
+                    
+            # Final commit for remaining logs
+            session.commit()
+            session.close()
+            
+            logger.info(f"Saved {saved_count} telecom logs to database")
+            
+            # Return result
+            return jsonify({
+                "message": f"Telecom log file processed successfully. {saved_count} logs saved to database.",
+                "log_count": len(log_entries),
+                "logs": [log.to_dict() for log in log_entries[:20]],  # Return first 20 logs for display
+                "telecom_domain": "5G/OpenRAN",
+                "file_path": file_path
+            })
+        elif file_extension in document_extensions:
+            # Register the document for fine-tuning
+            training_doc = None
+            try:
+                from utils.fine_tuning import TrainingDataProcessor
+                data_processor = TrainingDataProcessor()
+                
+                # Determine content type (default to telecom for telecom logs)
+                content_type = request.form.get('content_type', 'telecom')
+                
+                training_doc = data_processor.register_document(
+                    document_path=file_path,
+                    document_type=file_extension,
+                    content_type=content_type
+                )
+                
+                if training_doc:
+                    logger.info(f"Registered telecom document for fine-tuning: {file_path}")
+            except Exception as e:
+                logger.warning(f"Failed to register telecom document for fine-tuning: {str(e)}")
+            
+            response_data = {
+                "success": True,
+                "message": f"Successfully saved telecom document file for training",
+                "file_type": file_extension,
+                "file_path": file_path,
+                "telecom_domain": "5G/OpenRAN"
+            }
+            
+            if training_doc:
+                response_data["registered_for_fine_tuning"] = True
+                response_data["training_document_id"] = training_doc.id
+                response_data["content_type"] = content_type
+            
+            return jsonify(response_data)
+        else:
+            # For unsupported file types, still save but show a warning
+            return jsonify({
+                "warning": f"Unsupported file type: .{file_extension}. File saved but not processed.",
+                "supported_types": log_extensions + document_extensions,
+                "file_path": file_path
+            }), 200
+    except Exception as e:
+        logger.error(f"Error processing telecom file: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": f"Failed to process telecom file: {str(e)}"}), 500
+
+@app.route('/api/telecom/logs/sample', methods=['GET'])
+def get_sample_telecom_logs():
+    """API endpoint to retrieve sample telecom logs for testing"""
+    # Check if telecom components are available
+    if not telecom_integration or not telecom_integration.is_healthy():
+        return jsonify({
+            "error": "Telecom components not available"
+        }), 400
+        
+    try:
+        # Load sample telecom logs
+        sample_logs = telecom_integration.load_sample_telecom_logs()
+        
+        if not sample_logs:
+            return jsonify({
+                "error": "No sample telecom logs available"
+            }), 404
+            
+        # Process logs for vector embeddings
+        log_processor.process_logs_for_embeddings(sample_logs, vector_store)
+        
+        # Save logs to database
+        session = get_db_session()
+        saved_count = 0
+        
+        for log_entry in sample_logs:
+            # Create database model from log entry
+            db_log = DBLogEntry(
+                timestamp=log_entry.timestamp,
+                level=log_entry.level,
+                message=log_entry.message,
+                service=log_entry.service,
+                additional_fields=log_entry.additional_fields
+            )
+            session.add(db_log)
+            saved_count += 1
+            
+            # Commit in batches to avoid memory issues
+            if saved_count % 100 == 0:
+                session.commit()
+                
+        # Final commit for remaining logs
+        session.commit()
+        session.close()
+        
+        logger.info(f"Saved {saved_count} sample telecom logs to database")
+        
+        # Return result
+        return jsonify({
+            "message": f"Sample telecom logs loaded successfully. {saved_count} logs saved to database.",
+            "log_count": len(sample_logs),
+            "logs": [log.to_dict() for log in sample_logs[:20]]  # Return first 20 logs for display
+        })
+    except Exception as e:
+        logger.error(f"Error loading sample telecom logs: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": f"Failed to load sample telecom logs: {str(e)}"}), 500
+
+@app.route('/api/telecom/anomalies', methods=['GET'])
+def get_telecom_anomalies():
+    """API endpoint to retrieve detected telecom anomalies in logs"""
+    # Check if telecom components are available
+    if not telecom_integration or not telecom_integration.is_healthy():
+        return jsonify({
+            "error": "Telecom components not available"
+        }), 400
+        
+    try:
+        session = get_db_session()
+        
+        # Get limit from query parameters with default
+        limit = request.args.get('limit', default=100, type=int)
+        
+        # Get recent logs for analysis
+        recent_logs = session.query(DBLogEntry).order_by(DBLogEntry.timestamp.desc()).limit(500).all()
+        log_entries = [DBLogEntry.to_log_entry(log) for log in recent_logs]
+        
+        # Only keep telecom logs
+        telecom_log_entries = []
+        for log_entry in log_entries:
+            if telecom_integration.is_telecom_log(log_entry):
+                telecom_log_entries.append(log_entry)
+                
+        # If no telecom logs found, return empty result
+        if not telecom_log_entries:
+            return jsonify({
+                "telecom_anomalies_count": 0,
+                "telecom_anomalies": [],
+                "telecom_anomaly_patterns": [],
+                "domain": "unknown",
+                "ai_explanation": "No telecom logs found"
+            })
+            
+        # Detect telecom anomalies
+        telecom_anomaly_info = telecom_integration.detect_telecom_anomalies(telecom_log_entries)
+        
+        # Limit the number of anomalies returned
+        limited_anomalies = telecom_anomaly_info.get("telecom_anomalies", [])[:limit]
+        
+        # Generate AI-based explanation for the anomalies (if we have anomalies)
+        explanation = ""
+        if limited_anomalies and llm_interface.is_healthy():
+            # Construct a prompt with the detected anomalies
+            anomaly_examples = "\n".join([
+                f"- {a.get('level', 'INFO')}: {a.get('message', 'No message')}"
+                for a in limited_anomalies[:5]  # Only include a few examples to keep prompt short
+            ])
+            
+            patterns_text = ""
+            if telecom_anomaly_info.get("telecom_anomaly_patterns"):
+                patterns_text = "\nDetected patterns in telecom anomalies:\n" + "\n".join([
+                    f"- {p.get('description', 'Unknown pattern')} in {p.get('component', 'unknown component')}"
+                    for p in telecom_anomaly_info.get("telecom_anomaly_patterns", [])
+                ])
+                
+            prompt = f"""
+            You are a telecom expert analyzing 5G and OpenRAN log anomalies.
+            
+            Analyze these telecom log anomalies detected in the system and provide 
+            a detailed explanation of what might be happening based on these patterns.
+            Focus on the telecom-specific implications and potential root causes.
+            
+            Recent telecom anomalies detected:
+            {anomaly_examples}
+            {patterns_text}
+            
+            Based on these anomalies, explain:
+            1. What telecom components or services are affected
+            2. The likely root cause of these issues
+            3. Recommended troubleshooting steps specific to 5G/OpenRAN systems
+            """
+            
+            try:
+                explanation = llm_interface.generate_text(prompt.strip())
+            except Exception as e:
+                logger.error(f"Error generating telecom anomaly explanation: {str(e)}")
+                explanation = "Could not generate explanation due to LLM service error."
+                
+        session.close()
+        
+        # Return telecom anomalies with explanation
+        return jsonify({
+            "telecom_anomalies_count": telecom_anomaly_info.get("telecom_anomalies_count", 0),
+            "telecom_anomalies": limited_anomalies,
+            "telecom_anomaly_patterns": telecom_anomaly_info.get("telecom_anomaly_patterns", []),
+            "domain": telecom_log_entries[0].additional_fields.get("telecom_metadata", {}).get("component_type", "5G/OpenRAN") if telecom_log_entries else "unknown",
+            "ai_explanation": explanation
+        })
+    except Exception as e:
+        logger.error(f"Error retrieving telecom anomalies: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        # Fallback if error occurs
+        return jsonify({
+            "telecom_anomalies_count": 0,
+            "telecom_anomalies": [],
+            "telecom_anomaly_patterns": [],
+            "domain": "unknown",
+            "ai_explanation": f"Error retrieving telecom anomalies: {str(e)}"
+        }), 500
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """API endpoint for application health check"""
+    # Check basic components
+    basic_components = {
+        "vector_store": vector_store.is_healthy(),
+        "llm": llm_interface.is_healthy(),
+        "embedding_model": log_processor.is_healthy()
+    }
+    
+    # Check telecom components if available
+    telecom_healthy = False
+    if telecom_integration:
+        telecom_healthy = telecom_integration.is_healthy()
+        basic_components["telecom"] = telecom_healthy
+    
+    # Determine overall status
+    overall_status = "healthy"
+    if not all(basic_components.values()):
+        overall_status = "degraded"
+    
+    status = {
+        "status": overall_status,
+        "components": basic_components
+    }
+    
+    return jsonify(status)
+
+# Routes for fine-tuning
+@app.route('/api/fine-tuning/documents_old', methods=['GET'])
+def get_training_documents_old():
+    """API endpoint to get available training documents (deprecated)"""
+    try:
+        # Initialize the training data processor
+        from utils.fine_tuning import TrainingDataProcessor
+        data_processor = TrainingDataProcessor()
+        
+        # Get filters from query parameters
+        content_type = request.args.get('content_type', None)
+        processed_only = request.args.get('processed_only', 'true') != 'false'
+        
+        # Get documents
+        documents = data_processor.get_all_training_documents(
+            content_type=content_type,
+            processed_only=processed_only
+        )
+        
+        # Get stats
+        stats = data_processor.get_stats()
+        
+        return jsonify({
+            'status': 'success',
+            'documents': documents,
+            'stats': stats
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting training documents: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        return jsonify({
+            'status': 'error',
+            'message': f"Failed to retrieve training documents: {str(e)}"
+        }), 500
+        
+@app.route('/api/fine-tuning/process-document/<int:doc_id>', methods=['POST'])
+def process_training_document(doc_id):
+    """API endpoint to process a training document"""
+    try:
+        # Initialize the training data processor
+        from utils.fine_tuning import TrainingDataProcessor
+        data_processor = TrainingDataProcessor()
+        
+        # Process the document
+        success = data_processor.process_document(doc_id)
+        
+        if success:
+            return jsonify({
+                'status': 'success',
+                'message': f"Document {doc_id} processed successfully"
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': f"Failed to process document {doc_id}"
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Error processing document {doc_id}: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        return jsonify({
+            'status': 'error',
+            'message': f"Failed to process document {doc_id}: {str(e)}"
+        }), 500
+        
+@app.route('/api/fine-tuning/jobs', methods=['GET'])
+def get_fine_tuning_jobs():
+    """API endpoint to get fine-tuning jobs"""
+    try:
+        # Initialize the fine-tuning manager
+        from utils.fine_tuning import FineTuningManager
+        ft_manager = FineTuningManager()
+        
+        # Get filters from query parameters
+        status = request.args.get('status', None)
+        limit = int(request.args.get('limit', 100))
+        
+        # Get jobs
+        jobs = ft_manager.get_fine_tuning_jobs(
+            status=status,
+            limit=limit
+        )
+        
+        return jsonify({
+            'status': 'success',
+            'jobs': jobs
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting fine-tuning jobs: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        return jsonify({
+            'status': 'error',
+            'message': f"Failed to retrieve fine-tuning jobs: {str(e)}"
+        }), 500
+        
+@app.route('/api/fine-tuning/jobs', methods=['POST'])
+def create_fine_tuning_job():
+    """API endpoint to create a fine-tuning job"""
+    try:
+        # Get job parameters from request
+        data = request.json
+        
+        job_name = data.get('job_name')
+        model_name = data.get('model_name')
+        training_file_ids = data.get('training_file_ids', [])
+        parameters = data.get('parameters', {})
+        
+        # Validate required parameters
+        if not job_name:
+            return jsonify({
+                'status': 'error',
+                'message': "Job name is required"
+            }), 400
+            
+        if not model_name:
+            return jsonify({
+                'status': 'error',
+                'message': "Model name is required"
+            }), 400
+            
+        if not training_file_ids:
+            return jsonify({
+                'status': 'error',
+                'message': "At least one training file ID is required"
+            }), 400
+            
+        # Initialize the fine-tuning manager
+        from utils.fine_tuning import FineTuningManager
+        ft_manager = FineTuningManager()
+        
+        # Create the job
+        job = ft_manager.create_fine_tuning_job(
+            job_name=job_name,
+            model_name=model_name,
+            training_file_ids=training_file_ids,
+            parameters=parameters
+        )
+        
+        if job:
+            return jsonify({
+                'status': 'success',
+                'job_id': job.id,
+                'message': f"Fine-tuning job created successfully with ID {job.id}"
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': "Failed to create fine-tuning job"
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Error creating fine-tuning job: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        return jsonify({
+            'status': 'error',
+            'message': f"Failed to create fine-tuning job: {str(e)}"
+        }), 500
+        
+@app.route('/api/fine-tuning/models', methods=['GET'])
+def get_available_models():
+    """API endpoint to get available models"""
+    try:
+        # Initialize the fine-tuning manager
+        from utils.fine_tuning import FineTuningManager
+        ft_manager = FineTuningManager()
+        
+        # Get models
+        models = ft_manager.get_available_models()
+        
+        return jsonify({
+            'status': 'success',
+            'models': models
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting available models: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        return jsonify({
+            'status': 'error',
+            'message': f"Failed to retrieve available models: {str(e)}"
+        }), 500
+        
+@app.route('/api/fine-tuning/job/<int:job_id>', methods=['GET'])
+def get_job_status(job_id):
+    """API endpoint to get the status of a fine-tuning job"""
+    try:
+        # Initialize the fine-tuning manager
+        from utils.fine_tuning import FineTuningManager
+        ft_manager = FineTuningManager()
+        
+        # Get job status
+        job = ft_manager.get_job_status(job_id)
+        
+        if job:
+            return jsonify({
+                'status': 'success',
+                'job': job
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': f"Job with ID {job_id} not found"
+            }), 404
+            
+    except Exception as e:
+        logger.error(f"Error getting job status for job {job_id}: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        return jsonify({
+            'status': 'error',
+            'message': f"Failed to retrieve job status: {str(e)}"
+        }), 500
+
+@app.route('/api/telecom/health', methods=['GET'])
+def telecom_health_check():
+    """API endpoint for telecom-specific health monitoring"""
+    try:
+        # Check if telecom components are available
+        if not telecom_integration or not telecom_integration.is_healthy():
+            return jsonify({
+                "error": "Telecom components not available"
+            }), 400
+            
+        # Get recent logs from database
+        session = get_db_session()
+        recent_logs = session.query(DBLogEntry).order_by(DBLogEntry.timestamp.desc()).limit(500).all()
+        log_entries = [DBLogEntry.to_log_entry(log) for log in recent_logs]
+        session.close()
+        
+        # Filter only telecom logs
+        telecom_log_entries = []
+        for log_entry in log_entries:
+            if telecom_integration.is_telecom_log(log_entry):
+                telecom_log_entries.append(log_entry)
+        
+        # Initialize network health data
+        network_health = {
+            "5g_core": {
+                "nodes": [
+                    {"id": "amf", "name": "AMF", "status": "healthy"},
+                    {"id": "smf", "name": "SMF", "status": "healthy"},
+                    {"id": "upf", "name": "UPF", "status": "healthy"},
+                    {"id": "ausf", "name": "AUSF", "status": "healthy"},
+                    {"id": "udm", "name": "UDM", "status": "healthy"},
+                    {"id": "udr", "name": "UDR", "status": "healthy"},
+                    {"id": "pcf", "name": "PCF", "status": "healthy"},
+                    {"id": "nrf", "name": "NRF", "status": "healthy"},
+                    {"id": "nssf", "name": "NSSF", "status": "healthy"}
+                ]
+            },
+            "openran": {
+                "nodes": [
+                    {"id": "o-du", "name": "O-DU", "status": "healthy"},
+                    {"id": "o-cu-cp", "name": "O-CU-CP", "status": "healthy"}, 
+                    {"id": "o-cu-up", "name": "O-CU-UP", "status": "healthy"},
+                    {"id": "o-ru", "name": "O-RU", "status": "healthy"},
+                    {"id": "ric", "name": "Near-RT RIC", "status": "healthy"}
+                ]
+            }
+        }
+        
+        # Analyze logs to determine component health
+        if telecom_log_entries:
+            # Process logs to update network health
+            update_network_health(network_health, telecom_log_entries)
+        
+        return jsonify(network_health)
+    except Exception as e:
+        logger.error(f"Error retrieving telecom health: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+def update_network_health(network_health, telecom_logs):
+    """Update network health data based on telecom logs"""
+    # Track errors by component
+    component_errors = {}
+    component_warnings = {}
+    
+    # Analyze logs for errors and warnings
+    for log in telecom_logs:
+        # Get the component from telecom metadata or service field
+        component = None
+        if hasattr(log, 'telecom_metadata') and log.telecom_metadata:
+            if 'network_function' in log.telecom_metadata:
+                component = log.telecom_metadata['network_function'].lower()
+        elif log.service:
+            component = log.service.lower()
+            
+        # Skip if component not identified
+        if not component:
+            continue
+            
+        # Track errors and warnings by component
+        if log.level == "ERROR":
+            component_errors[component] = component_errors.get(component, 0) + 1
+        elif log.level == "WARN" or log.level == "WARNING":
+            component_warnings[component] = component_warnings.get(component, 0) + 1
+    
+    # Update 5G Core component statuses
+    for node in network_health["5g_core"]["nodes"]:
+        component_id = node["id"].lower()
+        
+        # Map AMF to amf, etc.
+        component_key = component_id
+        if component_id == "amf":
+            component_key = "amf"
+        elif component_id == "smf":
+            component_key = "smf"
+        elif component_id == "upf":
+            component_key = "upf"
+        elif component_id == "ausf":
+            component_key = "ausf"
+        elif component_id == "udm":
+            component_key = "udm"
+        elif component_id == "udr":
+            component_key = "udr"
+        elif component_id == "pcf":
+            component_key = "pcf"
+        elif component_id == "nrf":
+            component_key = "nrf"
+        elif component_id == "nssf":
+            component_key = "nssf"
+        
+        # Set status based on errors and warnings
+        if component_key in component_errors and component_errors[component_key] > 0:
+            node["status"] = "critical"
+        elif component_key in component_warnings and component_warnings[component_key] > 0:
+            node["status"] = "degraded"
+        else:
+            node["status"] = "healthy"
+    
+    # Update OpenRAN component statuses
+    for node in network_health["openran"]["nodes"]:
+        component_id = node["id"].lower()
+        
+        # Map o-du to o_du, o-ru to o_ru, etc.
+        component_key = component_id.replace("-", "_")
+        if component_id == "o-du":
+            component_key = "o_du"
+        elif component_id == "o-cu-cp":
+            component_key = "o_cu_cp"
+        elif component_id == "o-cu-up":
+            component_key = "o_cu_up"
+        elif component_id == "o-ru":
+            component_key = "o_ru"
+        elif component_id == "ric":
+            component_key = "ric"
+        
+        # Set status based on errors and warnings
+        if component_key in component_errors and component_errors[component_key] > 0:
+            node["status"] = "critical"
+        elif component_key in component_warnings and component_warnings[component_key] > 0:
+            node["status"] = "degraded"
+        else:
+            node["status"] = "healthy"
+
+# Fine-tuning endpoints
+@app.route('/api/training/documents', methods=['GET'])
+def get_training_documents():
+    """API endpoint to get available training documents"""
+    try:
+        from utils.fine_tuning import TrainingDataProcessor
+        processor = TrainingDataProcessor()
+        
+        # Get query parameters
+        content_type = request.args.get('content_type', default=None)
+        processed_only = request.args.get('processed_only', default='false').lower() == 'true'
+        
+        # Get documents
+        documents = processor.get_all_training_documents(
+            content_type=content_type,
+            processed_only=processed_only
+        )
+        
+        # Get stats
+        stats = processor.get_stats()
+        
+        return jsonify({
+            "documents": documents,
+            "stats": stats
+        })
+    except Exception as e:
+        logger.error(f"Error retrieving training documents: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/training/documents/<int:doc_id>', methods=['GET'])
+def get_training_document(doc_id):
+    """API endpoint to get details of a specific training document"""
+    try:
+        from utils.fine_tuning import TrainingDataProcessor
+        processor = TrainingDataProcessor()
+        
+        # Get document from database
+        session = get_db_session()
+        doc = session.query(DBTrainingData).filter_by(id=doc_id).first()
+        
+        if not doc:
+            return jsonify({"error": f"Document with ID {doc_id} not found"}), 404
+            
+        # Convert to dictionary
+        doc_dict = {
+            'id': doc.id,
+            'document_path': doc.document_path,
+            'document_type': doc.document_type,
+            'content_type': doc.content_type,
+            'is_processed': bool(doc.is_processed),
+            'created_at': doc.created_at.isoformat() if doc.created_at else None
+        }
+        
+        # If document has been processed, get extracted text
+        extracted_text = None
+        if doc.is_processed and doc.extracted_text:
+            try:
+                with open(doc.extracted_text, 'r', encoding='utf-8') as f:
+                    extracted_text = f.read()
+                    # Limit to first 5000 chars for preview
+                    if len(extracted_text) > 5000:
+                        extracted_text = extracted_text[:5000] + "...\n[Text truncated for preview]"
+            except Exception as e:
+                logger.error(f"Error reading extracted text for document {doc_id}: {str(e)}")
+                extracted_text = f"Error reading extracted text: {str(e)}"
+        
+        doc_dict['extracted_text'] = extracted_text
+        
+        session.close()
+        return jsonify({"document": doc_dict})
+    except Exception as e:
+        logger.error(f"Error retrieving document {doc_id}: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/training/documents/<int:doc_id>/process', methods=['POST'])
+def process_training_document(doc_id):
+    """API endpoint to process a training document"""
+    try:
+        from utils.fine_tuning import TrainingDataProcessor
+        processor = TrainingDataProcessor()
+        
+        # Process document
+        if processor.process_document(doc_id):
+            return jsonify({"success": True, "message": f"Document {doc_id} processed successfully"})
+        else:
+            return jsonify({"error": f"Failed to process document {doc_id}"}), 500
+    except Exception as e:
+        logger.error(f"Error processing document {doc_id}: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/fine-tuning/jobs', methods=['GET'])
+def get_fine_tuning_jobs():
+    """API endpoint to get fine-tuning jobs"""
+    try:
+        # Get jobs from database
+        session = get_db_session()
+        jobs = session.query(DBFineTuningJob).order_by(DBFineTuningJob.created_at.desc()).all()
+        
+        # Convert to dictionaries
+        job_dicts = []
+        for job in jobs:
+            job_dict = {
+                'id': job.id,
+                'job_name': job.job_name,
+                'model_name': job.model_name,
+                'fine_tuned_model_name': job.fine_tuned_model_name,
+                'status': job.status,
+                'created_at': job.created_at.isoformat() if job.created_at else None,
+                'updated_at': job.updated_at.isoformat() if job.updated_at else None
+            }
+            job_dicts.append(job_dict)
+            
+        session.close()
+        return jsonify({"jobs": job_dicts})
+    except Exception as e:
+        logger.error(f"Error retrieving fine-tuning jobs: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/fine-tuning/jobs', methods=['POST'])
+def create_fine_tuning_job():
+    """API endpoint to create a fine-tuning job"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+            
+        # Validate required fields
+        required_fields = ['job_name', 'model_name', 'training_file_ids']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+                
+        # Get parameters
+        job_name = data['job_name']
+        model_name = data['model_name']
+        training_file_ids = data['training_file_ids']
+        parameters = data.get('parameters', {})
+        
+        # Create job
+        from utils.fine_tuning import FineTuningManager
+        manager = FineTuningManager()
+        
+        job = manager.create_fine_tuning_job(
+            job_name=job_name,
+            model_name=model_name,
+            training_file_ids=training_file_ids,
+            parameters=parameters
+        )
+        
+        if not job:
+            return jsonify({"error": "Failed to create fine-tuning job"}), 500
+            
+        # Start job in background
+        manager.start_background_worker()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Fine-tuning job '{job_name}' created",
+            "job_id": job.id
+        })
+    except Exception as e:
+        logger.error(f"Error creating fine-tuning job: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/fine-tuning/jobs/<int:job_id>', methods=['GET'])
+def get_job_status(job_id):
+    """API endpoint to get the status of a fine-tuning job"""
+    try:
+        # Get job from database
+        session = get_db_session()
+        job = session.query(DBFineTuningJob).filter_by(id=job_id).first()
+        
+        if not job:
+            session.close()
+            return jsonify({"error": f"Job with ID {job_id} not found"}), 404
+            
+        # Convert to dictionary
+        job_dict = {
+            'id': job.id,
+            'job_name': job.job_name,
+            'model_name': job.model_name,
+            'fine_tuned_model_name': job.fine_tuned_model_name,
+            'status': job.status,
+            'created_at': job.created_at.isoformat() if job.created_at else None,
+            'updated_at': job.updated_at.isoformat() if job.updated_at else None,
+            'error_message': job.error_message,
+            'training_files': job.training_files,
+            'parameters': job.parameters
+        }
+        
+        session.close()
+        return jsonify({"job": job_dict})
+    except Exception as e:
+        logger.error(f"Error retrieving job status for job {job_id}: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/fine-tuning/models', methods=['GET'])
+def get_available_models():
+    """API endpoint to get available models"""
+    try:
+        from utils.fine_tuning import FineTuningManager
+        manager = FineTuningManager()
+        
+        # Check if manager is healthy
+        if not manager.is_healthy():
+            logger.warning("Fine-tuning manager is not healthy, returning simulated models")
+            # Return simulated models
+            simulated_models = [
+                {
+                    "name": "llama2",
+                    "is_fine_tuned": False,
+                    "size": "13B",
+                    "status": "available",
+                },
+                {
+                    "name": "mistral",
+                    "is_fine_tuned": False,
+                    "size": "7B",
+                    "status": "available",
+                }
+            ]
+            
+            # Add any fine-tuned models from database
+            session = get_db_session()
+            fine_tuned_jobs = session.query(DBFineTuningJob).filter(
+                DBFineTuningJob.status == 'completed',
+                DBFineTuningJob.fine_tuned_model_name.isnot(None)
+            ).all()
+            
+            for job in fine_tuned_jobs:
+                if job.fine_tuned_model_name:
+                    simulated_models.append({
+                        "name": job.fine_tuned_model_name,
+                        "is_fine_tuned": True,
+                        "size": "Custom",
+                        "status": "available",
+                        "created_at": job.updated_at.isoformat() if job.updated_at else None
+                    })
+                    
+            session.close()
+            return jsonify({"models": simulated_models})
+        
+        # Get models from OLLAMA
+        api_models = manager._get_available_models()
+        models = []
+        
+        for model_name in api_models:
+            model_info = {
+                "name": model_name,
+                "is_fine_tuned": False,
+                "status": "available"
+            }
+            
+            # Check if it's a fine-tuned model from our system
+            if model_name.startswith(('ft-', 'custom-')):
+                model_info["is_fine_tuned"] = True
+            
+            models.append(model_info)
+            
+        # If no models were found, add default models
+        if not models:
+            models = [
+                {
+                    "name": "llama2",
+                    "is_fine_tuned": False,
+                    "status": "available"
+                }
+            ]
+            
+        return jsonify({"models": models})
+    except Exception as e:
+        logger.error(f"Error retrieving available models: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)

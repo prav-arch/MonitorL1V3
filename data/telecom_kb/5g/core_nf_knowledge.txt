@@ -1,0 +1,164 @@
+# 5G Core Network Functions Overview
+
+## AMF (Access and Mobility Management Function)
+The AMF is responsible for handling access and mobility management tasks. Key functions include:
+- Termination of RAN CP interface (N2)
+- Termination of NAS (N1)
+- Registration management
+- Connection management
+- Reachability management
+- Mobility management
+- Access authentication and authorization
+- Security context management
+- Security procedure handling with UE
+
+## SMF (Session Management Function)
+The SMF manages session-related functions. Key responsibilities include:
+- Session establishment, modification and release
+- UE IP address allocation and management
+- DHCP functions
+- Selection and control of UP function
+- Termination of interfaces towards policy control function
+- Lawful intercept (UP collection)
+- Charging data collection and support
+
+## UPF (User Plane Function)
+The UPF handles user plane traffic. Key functions include:
+- Packet routing and forwarding
+- Packet inspection
+- QoS handling
+- Lawful intercept (UP collection)
+- Traffic usage reporting
+- Uplink classifier to support routing traffic
+- Branching point to support multi-homed PDU session
+- QoS enforcement
+- Traffic steering
+
+## PCF (Policy Control Function)
+The PCF provides policy rules to control plane functions. Key responsibilities include:
+- Policy rules to control plane function(s) that enforce them
+- Access subscription information for policy decisions
+- Support unified policy framework
+- Provide policy to UE for background data transfer
+
+## UDM (Unified Data Management)
+The UDM stores and manages subscriber data. Key functions include:
+- Generation of 3GPP AKA Authentication Credentials
+- User identification handling
+- Access authorization
+- Subscription management
+- SMS management
+- Support of AUSF and AMF related interfaces
+
+## AUSF (Authentication Server Function)
+The AUSF handles authentication processes. Key responsibilities include:
+- Authentication for 3GPP access and untrusted non-3GPP access
+- Authentication framework for primary authentication
+- Support for authentication methods and key agreement
+- Interact with UDM to retrieve authentication data
+
+## NRF (Network Repository Function)
+The NRF provides service discovery and registration. Key functions include:
+- Support service discovery function
+- Maintain NF profile
+- Maintain SBA registration
+
+## NSSF (Network Slice Selection Function)
+The NSSF selects appropriate network slices. Key functions include:
+- Selecting the Network Slice instances to serve the UE
+- Determining the AMF set to be used to serve the UE
+- Helping to select an AMF for the UE
+
+## NEF (Network Exposure Function)
+The NEF exposes network capabilities. Key responsibilities include:
+- Exposure of capabilities and events
+- Secure provision of information from external application
+- Translation of internal/external information
+
+## UDR (Unified Data Repository)
+The UDR stores subscription data. Key functions include:
+- Storage and retrieval of subscription data by UDM
+- Storage and retrieval of policy data by PCF
+- Storage and retrieval of structured data for exposure
+- Application data storage and retrieval by application functions
+
+## 5G Core Interfaces
+
+### N1 Interface
+Between UE and AMF, carries NAS signaling.
+
+### N2 Interface
+Between RAN and AMF, carries control plane signaling.
+
+### N3 Interface
+Between RAN and UPF, carries user plane data.
+
+### N4 Interface
+Between SMF and UPF, for UPF control.
+
+### N5 Interface
+Between PCF and AF, for policy information.
+
+### N6 Interface
+Between UPF and DN (Data Network).
+
+### N7 Interface
+Between SMF and PCF, for policy information.
+
+### N8 Interface
+Between UDM and AMF, for subscription information.
+
+### N9 Interface
+Between different UPFs, for user plane forwarding.
+
+### N10 Interface
+Between UDM and SMF, for subscription information.
+
+### N11 Interface
+Between AMF and SMF, for session management.
+
+### N12 Interface
+Between AMF and AUSF, for authentication.
+
+### N13 Interface
+Between UDM and AUSF, for authentication information.
+
+### N14 Interface
+Between different AMFs, for mobility.
+
+### N15 Interface
+Between AMF and PCF, for policy information.
+
+## Common 5G Core Problems and Solutions
+
+### Authentication Failures
+Problem: UE authentication repeatedly fails with AMF/AUSF.
+Solution: Verify AUSF connectivity to UDM and check authentication vector generation.
+
+### Session Establishment Failures
+Problem: PDU sessions fail to establish between UE and DN.
+Solution: Check SMF-UPF communication via N4 and UPF connectivity to DN.
+
+### Mobility Management Issues
+Problem: Handovers fail when UE moves between gNBs.
+Solution: Verify AMF's N2 connections and path switch request handling.
+
+### Policy Enforcement Problems
+Problem: QoS policies not properly enforced in user plane.
+Solution: Verify PCF-SMF communication and SMF-UPF policy enforcement.
+
+### Slice Selection Errors
+Problem: UE connected to incorrect network slice.
+Solution: Check NSSF configuration and AMF selection logic.
+
+### Registration Failures
+Problem: UE fails to register with 5G Core.
+Solution: Verify AMF's N1/N2 interfaces and UDM connectivity for subscription data.
+
+### Inter-NF Communication Issues
+Problem: Network functions unable to discover or communicate with each other.
+Solution: Verify NRF configuration and service-based interface connectivity.
+
+### UDM Data Access Issues
+Problem: Subscription data unavailable for UEs.
+Solution: Check UDM-UDR connectivity and repository data consistency.

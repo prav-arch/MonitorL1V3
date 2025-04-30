@@ -1,0 +1,50 @@
+[
+  {
+    "timestamp": "2025-04-24 08:00:46",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Processed 209 packets successfully",
+    "source_ip": "192.168.147.86",
+    "correlation_id": "corr-360C62"
+  },
+  {
+    "timestamp": "2025-04-24 08:00:46",
+    "level": "WARN",
+    "service": "core-network",
+    "message": "Buffer utilization at 75%",
+    "source_ip": "192.168.76.232",
+    "correlation_id": "corr-fc9B04"
+  },
+  {
+    "timestamp": "2025-04-24 08:00:46",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Session initiated for subscriber ID-EFbb6CC1",
+    "source_ip": "192.168.31.251",
+    "correlation_id": "corr-FF18Fa"
+  },
+  {
+    "timestamp": "2025-04-24 08:00:46",
+    "level": "WARN",
+    "service": "core-network",
+    "message": "Slow response from packet-gateway",
+    "source_ip": "192.168.59.169",
+    "correlation_id": "corr-7eFD9B"
+  },
+  {
+    "timestamp": "2025-04-24 08:00:46",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Session initiated for subscriber ID-2E968C22",
+    "source_ip": "192.168.122.245",
+    "correlation_id": "corr-a00fa5"
+  },
+  {
+    "timestamp": "2025-04-24 08:00:46",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Session initiated for subscriber ID-9AfbBeb1",
+    "source_ip": "192.168.181.72",
+    "correlation_id": "corr-D94d5f"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Configuration update applied to subscriber-db",
+    "source_ip": "192.168.162.214",
+    "correlation_id": "corr-dBADfA"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "WARN",
+    "service": "core-network",
+    "message": "Slow response from packet-gateway",
+    "source_ip": "192.168.102.41",
+    "correlation_id": "corr-ec4EF1"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "WARN",
+    "service": "signaling",
+    "message": "Retry attempt 977 for operation",
+    "source_ip": "192.168.30.50",
+    "correlation_id": "corr-0AeED3"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "ERROR",
+    "service": "signaling",
+    "message": "Resource allocation failed for memory",
+    "source_ip": "192.168.248.105",
+    "correlation_id": "corr-FcbefE"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Connection established to core-network",
+    "source_ip": "192.168.76.38",
+    "correlation_id": "corr-cfFB3f"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Handover complete for UE ID-e65a2BCe",
+    "source_ip": "192.168.61.197",
+    "correlation_id": "corr-c5B3c8"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Processed 515 packets successfully",
+    "source_ip": "192.168.85.178",
+    "correlation_id": "corr-B5cbfC"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "WARN",
+    "service": "subscriber-db",
+    "message": "Connection pool nearing capacity",
+    "source_ip": "192.168.151.218",
+    "correlation_id": "corr-cb3Eff"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Session initiated for subscriber ID-0408c18A",
+    "source_ip": "192.168.101.214",
+    "correlation_id": "corr-BbB8a5"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "ERROR",
+    "service": "radio-access",
+    "message": "Resource allocation failed for bandwidth",
+    "source_ip": "192.168.111.106",
+    "correlation_id": "corr-eeFCAB"
+  },
+  {
+    "timestamp": "2025-04-21 19:21:05",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Handover complete for UE ID-beCfAeea",
+    "source_ip": "192.168.176.61",
+    "correlation_id": "corr-49eccC"
+  }
+]

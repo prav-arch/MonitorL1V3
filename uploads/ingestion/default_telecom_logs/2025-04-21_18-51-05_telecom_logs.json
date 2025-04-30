@@ -1,0 +1,82 @@
+[
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "ERROR",
+    "service": "packet-gateway",
+    "message": "Timeout occurred during handover",
+    "source_ip": "192.168.199.248",
+    "correlation_id": "corr-48D426"
+  },
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Configuration update applied to signaling",
+    "source_ip": "192.168.90.132",
+    "correlation_id": "corr-32f469"
+  },
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "WARN",
+    "service": "subscriber-db",
+    "message": "Buffer utilization at 98%",
+    "source_ip": "192.168.189.223",
+    "correlation_id": "corr-c1De11"
+  },
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Session initiated for subscriber ID-6Db3d8bb",
+    "source_ip": "192.168.189.83",
+    "correlation_id": "corr-6fe42E"
+  },
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "INFO",
+    "service": "packet-gateway",
+    "message": "Session initiated for subscriber ID-C393C02a",
+    "source_ip": "192.168.114.118",
+    "correlation_id": "corr-B487FE"
+  },
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "WARN",
+    "service": "signaling",
+    "message": "Slow response from subscriber-db",
+    "source_ip": "192.168.246.25",
+    "correlation_id": "corr-B7c19a"
+  },
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "WARN",
+    "service": "signaling",
+    "message": "Retry attempt 240 for operation",
+    "source_ip": "192.168.70.98",
+    "correlation_id": "corr-Bdfa61"
+  },
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "ERROR",
+    "service": "core-network",
+    "message": "Resource allocation failed for bandwidth",
+    "source_ip": "192.168.165.208",
+    "correlation_id": "corr-7a6AeF"
+  },
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "INFO",
+    "service": "core-network",
+    "message": "Session initiated for subscriber ID-f3cA9E4E",
+    "source_ip": "192.168.97.223",
+    "correlation_id": "corr-ADeBBd"
+  },
+  {
+    "timestamp": "2025-04-21 18:51:05",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Processed 626 packets successfully",
+    "source_ip": "192.168.71.156",
+    "correlation_id": "corr-1F7D42"
+  }
+]

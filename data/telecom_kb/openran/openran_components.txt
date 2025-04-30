@@ -1,0 +1,125 @@
+# OpenRAN Components Overview
+
+## O-RU (O-RAN Radio Unit)
+The O-RU is responsible for radio frequency transmission and reception. It implements the lower part of the physical layer (PHY) and handles digitization of the radio signal. Key functions include:
+- RF signal processing
+- Digital-to-analog and analog-to-digital conversion
+- Power amplification
+- Beamforming capability
+- Fronthaul communication with O-DU
+
+## O-DU (O-RAN Distributed Unit)
+The O-DU implements the real-time L1 (high-PHY) and L2 functions of the radio access network. Its functions include:
+- Real-time scheduling
+- HARQ processing
+- Radio resource management
+- MAC layer functionality
+- RLC layer functionality
+- High-PHY layer processing
+- Fronthaul communication with O-RU
+- F1 interface with O-CU
+
+## O-CU-CP (O-RAN Centralized Unit - Control Plane)
+The O-CU-CP handles the control plane functions of the higher layers in the radio access network. Key functions include:
+- Radio Resource Control (RRC)
+- PDCP control plane processing
+- Control of O-DU operation
+- Mobility management
+- N2 interface with 5G Core (AMF)
+- F1-C interface with O-DU
+- E1 interface with O-CU-UP
+
+## O-CU-UP (O-RAN Centralized Unit - User Plane)
+The O-CU-UP handles the user plane functions of the higher layers in the radio access network. Key functions include:
+- PDCP user plane processing
+- IP packet handling
+- QoS enforcement
+- Data routing
+- N3 interface with 5G Core (UPF)
+- F1-U interface with O-DU
+- E1 interface with O-CU-CP
+
+## Near-RT RIC (Near-Real-Time RAN Intelligent Controller)
+The Near-RT RIC enables near-real-time control and optimization of RAN elements and resources. Key functions include:
+- RAN optimization with 10ms-1s control loop
+- Hosting xApps for specialized control functions
+- E2 interface with O-DU, O-CU-CP, and O-CU-UP
+- A1 interface with Non-RT RIC
+- Policy enforcement and orchestration
+
+## Non-RT RIC (Non-Real-Time RAN Intelligent Controller)
+The Non-RT RIC focuses on policy-based guidance for RAN functions and resources with control loops >1s. Key functions include:
+- AI/ML training for network optimization
+- Policy formation and distribution
+- Hosting rApps for intelligent network management
+- A1 interface with Near-RT RIC
+- Integration with Service Management and Orchestration (SMO)
+
+## xApps
+xApps are applications hosted on the Near-RT RIC platform to enable third-party applications and algorithms for near-real-time RAN control. Examples include:
+- Traffic steering
+- QoS optimization
+- Mobility management
+- Interference management
+- Load balancing
+
+## rApps
+rApps are applications hosted on the Non-RT RIC platform to enable intelligent management functions. Examples include:
+- Network slice SLA assurance
+- Energy savings management
+- Anomaly detection
+- Capacity planning
+- QoE optimization
+
+## SMO (Service Management and Orchestration)
+The SMO provides management functions for the O-RAN network. Key functions include:
+- O-Cloud management
+- Network function management
+- Performance management
+- Fault management
+- Configuration management
+- O1 interface with managed elements
+- Open API for integration with OSS/BSS
+
+## OpenRAN Interfaces
+
+### Fronthaul (Open Fronthaul)
+Connects O-DU to O-RU using eCPRI protocol over Ethernet.
+
+### F1 Interface
+- F1-C: Control plane interface between O-DU and O-CU-CP
+- F1-U: User plane interface between O-DU and O-CU-UP
+
+### E1 Interface
+Control interface between O-CU-CP and O-CU-UP for bearer management.
+
+### E2 Interface
+Interface between Near-RT RIC and O-RAN nodes (O-DU, O-CU) for programmable control.
+
+### A1 Interface
+Interface between Non-RT RIC and Near-RT RIC for policy-based guidance.
+
+### O1 Interface
+Management interface between SMO and O-RAN network functions.
+
+## Common OpenRAN Problems and Solutions
+
+### Fronthaul Synchronization Issues
+Problem: Timing synchronization failures between O-DU and O-RU.
+Solution: Implement enhanced IEEE 1588v2 PTP or SyncE with proper GNSS backup.
+
+### RIC Integration Failures
+Problem: xApps unable to control network elements via E2 interface.
+Solution: Verify E2 service models compatibility and ensure proper E2 node registration.
+
+### O-DU Overload
+Problem: O-DU processing overload during high traffic conditions.
+Solution: Implement dynamic resource allocation and optimize schedulers.
+
+### Multi-vendor Interoperability
+Problem: Integration issues between components from different vendors.
+Solution: Adhere to O-RAN Alliance specifications and perform integrated testing with OTICs.
+
+### E2 Interface Instability
+Problem: Intermittent connection drops on E2 interface.
+Solution: Implement proper retry mechanisms and ensure network stability between RIC and O-RAN nodes.

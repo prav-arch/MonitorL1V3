@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Data Pipeline Management{% endblock %}
+
+{% block data_pipeline_content %}
+<div class="container mt-4">
+    <h1 class="display-5 mb-4">Data Pipeline Management</h1>
+    
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card bg-dark border-primary shadow-sm">
+                <div class="card-header bg-primary bg-opacity-25 text-white">
+                    <h5 class="card-title mb-0">Pipeline Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Configure and manage data ingestion pipelines using NiFi and scheduler integration.
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">NiFi Integration</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="nifi-config-form">
+                                        <div class="mb-3">
+                                            <label for="nifi-url" class="form-label">NiFi URL</label>
+                                            <input type="url" class="form-control" id="nifi-url" placeholder="http://localhost:8080/nifi-api">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="nifi-username" class="form-label">Username (Optional)</label>
+                                            <input type="text" class="form-control" id="nifi-username">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="nifi-password" class="form-label">Password (Optional)</label>
+                                            <input type="password" class="form-control" id="nifi-password">
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="nifi-use-mock">
+                                                <label class="form-check-label" for="nifi-use-mock">
+                                                    Use Mock Mode (if NiFi not available)
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Connect</button>
+                                        <button type="button" class="btn btn-secondary" id="nifi-test-btn">Test Connection</button>
+                                        <button type="button" class="btn btn-info" id="nifi-dashboard-btn">Open NiFi Dashboard</button>
+                                    </form>
+                                </div>
+                                <div class="card-footer">
+                                    <span class="badge bg-secondary" id="nifi-status">Not Connected</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Scheduler Configuration</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="scheduler-config-form">
+                                        <div class="mb-3">
+                                            <label for="scheduler-type" class="form-label">Scheduler Type</label>
+                                            <select class="form-select" id="scheduler-type">
+                                                <option value="internal" selected>Internal Scheduler</option>
+                                                <option value="airflow">Airflow</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div id="airflow-config" class="d-none">
+                                            <div class="mb-3">
+                                                <label for="airflow-url" class="form-label">Airflow URL</label>
+                                                <input type="url" class="form-control" id="airflow-url" placeholder="http://localhost:8080/api/v1">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="airflow-username" class="form-label">Username</label>
+                                                <input type="text" class="form-control" id="airflow-username">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="airflow-password" class="form-label">Password</label>
+                                                <input type="password" class="form-control" id="airflow-password">
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary">Save Configuration</button>
+                                        <button type="button" class="btn btn-secondary" id="scheduler-test-btn">Test Connection</button>
+                                        <button type="button" class="btn btn-info" id="scheduler-dashboard-btn">Open Dashboard</button>
+                                    </form>
+                                </div>
+                                <div class="card-footer">
+                                    <span class="badge bg-success" id="scheduler-status">Internal Scheduler Running</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card bg-dark border-success shadow-sm">
+                <div class="card-header bg-success bg-opacity-25 text-white">
+                    <h5 class="card-title mb-0">Data Ingestion Jobs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-success" id="create-job-btn" data-bs-toggle="modal" data-bs-target="#create-job-modal">
+                            <i class="fas fa-plus me-1"></i> Create New Job
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="refresh-jobs-btn">
+                            <i class="fas fa-sync me-1"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="jobs-table">
+                            <thead>
+                                <tr>
+                                    <th>Job ID</th>
+                                    <th>Type</th>
+                                    <th>Schedule</th>
+                                    <th>Status</th>
+                                    <th>Last Run</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Jobs will be loaded here dynamically -->
+                                <tr>
+                                    <td colspan="6" class="text-center">Loading jobs...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-dark border-info shadow-sm">
+                <div class="card-header bg-info bg-opacity-25 text-white">
+                    <h5 class="card-title mb-0">Ingested Files</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <select class="form-select" id="job-filter">
+                                <option value="">All Jobs</option>
+                                <!-- Job options will be loaded dynamically -->
+                            </select>
+                            <button type="button" class="btn btn-secondary" id="refresh-files-btn">
+                                <i class="fas fa-sync me-1"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="files-table">
+                            <thead>
+                                <tr>
+                                    <th>Filename</th>
+                                    <th>Size</th>
+                                    <th>Created</th>
+                                    <th>Job</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Files will be loaded here dynamically -->
+                                <tr>
+                                    <td colspan="5" class="text-center">Select a job to view files</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Job Modal -->
+<div class="modal fade" id="create-job-modal" tabindex="-1" aria-labelledby="create-job-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="create-job-modal-label">Create New Data Ingestion Job</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="create-job-form">
+                    <div class="mb-3">
+                        <label for="job-type" class="form-label">Job Type</label>
+                        <select class="form-select" id="job-type" required>
+                            <option value="">Select job type</option>
+                            <option value="sftp">SFTP Ingestion</option>
+                            <option value="http">HTTP API Ingestion</option>
+                        </select>
+                    </div>
+                    
+                    <div id="sftp-config" class="d-none">
+                        <h6 class="mb-3">SFTP Configuration</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sftp-host" class="form-label">SFTP Host</label>
+                                    <input type="text" class="form-control" id="sftp-host" placeholder="sftp.example.com">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sftp-port" class="form-label">SFTP Port</label>
+                                    <input type="number" class="form-control" id="sftp-port" value="22">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sftp-username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="sftp-username">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sftp-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="sftp-password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sftp-remote-dir" class="form-label">Remote Directory</label>
+                            <input type="text" class="form-control" id="sftp-remote-dir" placeholder="/path/to/files">
+                        </div>
+                        <div class="mb-3">
+                            <label for="sftp-file-filter" class="form-label">File Filter</label>
+                            <input type="text" class="form-control" id="sftp-file-filter" placeholder="*.log" value="*.*">
+                        </div>
+                    </div>
+                    
+                    <div id="http-config" class="d-none">
+                        <h6 class="mb-3">HTTP API Configuration</h6>
+                        <div class="mb-3">
+                            <label for="http-url" class="form-label">API URL</label>
+                            <input type="url" class="form-control" id="http-url" placeholder="https://api.example.com/data">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="http-method" class="form-label">HTTP Method</label>
+                                    <select class="form-select" id="http-method">
+                                        <option value="GET" selected>GET</option>
+                                        <option value="POST">POST</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="http-data-type" class="form-label">Data Type</label>
+                                    <select class="form-select" id="http-data-type">
+                                        <option value="telecom_logs" selected>Telecom Logs</option>
+                                        <option value="metrics">Metrics</option>
+                                        <option value="events">Events</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="http-headers" class="form-label">HTTP Headers (JSON)</label>
+                            <textarea class="form-control" id="http-headers" rows="3" placeholder='{"Content-Type": "application/json", "Authorization": "Bearer xyz"}'></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="http-auth-username" class="form-label">Auth Username (Optional)</label>
+                                    <input type="text" class="form-control" id="http-auth-username">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="http-auth-password" class="form-label">Auth Password (Optional)</label>
+                                    <input type="password" class="form-control" id="http-auth-password">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mb-3 mt-4">Common Configuration</h6>
+                    <div class="mb-3">
+                        <label for="job-id" class="form-label">Job ID (Optional)</label>
+                        <input type="text" class="form-control" id="job-id" placeholder="Leave blank for auto-generated ID">
+                    </div>
+                    <div class="mb-3">
+                        <label for="local-directory" class="form-label">Local Directory (Optional)</label>
+                        <input type="text" class="form-control" id="local-directory" placeholder="uploads/ingestion/my_job">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="schedule-type" class="form-label">Schedule Type</label>
+                                <select class="form-select" id="schedule-type">
+                                    <option value="interval" selected>Interval</option>
+                                    <option value="cron">Cron</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="schedule-value" class="form-label">Schedule Value</label>
+                                <input type="text" class="form-control" id="schedule-value" placeholder="30 minutes" value="30 minutes">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-job-btn">Create Job</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Preview Modal -->
+<div class="modal fade" id="file-preview-modal" tabindex="-1" aria-labelledby="file-preview-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="file-preview-modal-label">File Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6 id="preview-filename" style="color: #000 !important;">filename.txt</h6>
+                </div>
+                <div class="border rounded p-3 bg-light">
+                    <pre id="file-content" class="mb-0" style="max-height: 400px; overflow-y: auto; color: #000; background-color: #fff;"></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="process-file-btn">Process File</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/data-pipeline.js') }}"></script>
+{% endblock %}

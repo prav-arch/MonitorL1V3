@@ -1,0 +1,457 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+    .telecom-dashboard-container {
+        min-height: 500px;
+        position: relative;
+    }
+    
+    .telecom-canvas-container {
+        width: 100%;
+        height: 500px;
+        background-color: rgba(33, 37, 41, 0.8);
+        border-radius: 8px;
+        position: relative;
+    }
+    
+    .network-label {
+        position: absolute;
+        font-size: 14px;
+        color: #adb5bd;
+        background-color: rgba(33, 37, 41, 0.7);
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+    
+    .core-label {
+        top: 10px;
+        right: 10px;
+    }
+    
+    .ran-label {
+        top: 10px;
+        left: 10px;
+    }
+    
+    .telecom-details-container {
+        height: 500px;
+        overflow-y: auto;
+    }
+    
+    .health-card {
+        transition: all 0.3s ease;
+    }
+    
+    .health-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .health-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .telecom-legend {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background-color: rgba(33, 37, 41, 0.8);
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block telecom_content %}
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-0">Telecom Network Health</h1>
+                    <p class="text-muted">Monitor 5G Core and OpenRAN components with real-time analytics</p>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-info" id="refresh-telecom-health">
+                        <i class="fas fa-sync-alt me-2"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline-info" id="toggle-labels">
+                        <i class="fas fa-tags me-2"></i> Toggle Labels
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-dark border-primary shadow-sm">
+                <div class="card-header bg-primary bg-opacity-25 text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-network-wired me-2"></i> Network Overview
+                    </h5>
+                </div>
+            <div class="card-body p-0">
+                <!-- Health Summary Cards -->
+                <div class="row mx-0 p-3 g-3">
+                    <div class="col-md-3">
+                        <div class="card health-card h-100 text-center bg-dark-subtle">
+                            <div class="card-body">
+                                <i class="fas fa-server health-icon text-primary"></i>
+                                <h6 class="card-title">5G Core</h6>
+                                <div class="d-flex justify-content-around mt-3">
+                                    <div class="text-center">
+                                        <span class="badge bg-success mb-1" id="core-healthy-count">0</span>
+                                        <div class="small">Healthy</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="badge bg-warning mb-1" id="core-degraded-count">0</span>
+                                        <div class="small">Degraded</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="badge bg-danger mb-1" id="core-critical-count">0</span>
+                                        <div class="small">Critical</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card health-card h-100 text-center bg-dark-subtle">
+                            <div class="card-body">
+                                <i class="fas fa-broadcast-tower health-icon text-info"></i>
+                                <h6 class="card-title">OpenRAN</h6>
+                                <div class="d-flex justify-content-around mt-3">
+                                    <div class="text-center">
+                                        <span class="badge bg-success mb-1" id="ran-healthy-count">0</span>
+                                        <div class="small">Healthy</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="badge bg-warning mb-1" id="ran-degraded-count">0</span>
+                                        <div class="small">Degraded</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="badge bg-danger mb-1" id="ran-critical-count">0</span>
+                                        <div class="small">Critical</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card health-card h-100 text-center bg-dark-subtle">
+                            <div class="card-body">
+                                <i class="fas fa-exchange-alt health-icon text-warning"></i>
+                                <h6 class="card-title">Interfaces</h6>
+                                <div class="d-flex justify-content-around mt-3">
+                                    <div class="text-center">
+                                        <span class="badge bg-success mb-1" id="interfaces-healthy-count">0</span>
+                                        <div class="small">Healthy</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="badge bg-warning mb-1" id="interfaces-degraded-count">0</span>
+                                        <div class="small">Degraded</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="badge bg-danger mb-1" id="interfaces-critical-count">0</span>
+                                        <div class="small">Critical</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card health-card h-100 text-center bg-dark-subtle">
+                            <div class="card-body">
+                                <i class="fas fa-heartbeat health-icon text-danger"></i>
+                                <h6 class="card-title">Overall Health</h6>
+                                <div class="mt-3">
+                                    <div class="progress mb-3" style="height: 25px;">
+                                        <div id="health-progress-bar" class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100%</div>
+                                    </div>
+                                    <div class="text-center" id="health-status-text">
+                                        <span class="badge bg-success">Healthy</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mx-0">
+                    <div class="col-md-8 mb-4">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <div class="text-center p-5 bg-dark-subtle rounded shadow-sm">
+                                <i class="fas fa-chart-line mb-3" style="font-size: 3rem; color: #0d6efd;"></i>
+                                <h4>Network Performance Analytics</h4>
+                                <p class="text-muted">View real-time analytics and system health metrics</p>
+                                <button class="btn btn-primary mt-3" id="view-analytics-button">
+                                    <i class="fas fa-chart-bar me-2"></i> View Analytics
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-4">
+                        <div class="telecom-details-container">
+                            <div class="card shadow-sm mb-4" id="telecom-node-details" style="display: none;">
+                                <!-- Node details will be dynamically populated here -->
+                                <div class="card-header bg-transparent">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-server me-2"></i> Node Details
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-mouse-pointer mb-3" style="font-size: 2rem; opacity: 0.5;"></i>
+                                        <p>Click on a network node to view details</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card shadow-sm">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-info-circle me-2"></i> System Information
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-sitemap me-2"></i> 5G Core</span>
+                                            <span class="badge bg-success" id="5g-core-status">Operational</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-broadcast-tower me-2"></i> OpenRAN</span>
+                                            <span class="badge bg-success" id="openran-status">Operational</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-brain me-2"></i> Analysis Engine</span>
+                                            <span class="badge bg-success" id="analysis-status">Active</span>
+                                        </li>
+                                    </ul>
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-primary" id="export-health-report">
+                                            <i class="fas fa-file-export me-1"></i> Export Health Report
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card bg-dark border-danger shadow-sm">
+            <div class="card-header bg-danger bg-opacity-25 text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Active Alerts
+                </h5>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-light" id="refresh-alerts">
+                        <i class="fas fa-sync-alt me-2"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Severity</th>
+                                <th>Component</th>
+                                <th>Message</th>
+                                <th>Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alerts-container">
+                            <!-- Alerts will be dynamically populated here -->
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Loading alerts...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/telecom-health-dashboard.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize telecom health dashboard
+    // Event listeners for buttons
+    const exportHealthBtn = document.getElementById('export-health-report');
+    if (exportHealthBtn) {
+        exportHealthBtn.addEventListener('click', exportHealthReport);
+    }
+    
+    const refreshAlertsBtn = document.getElementById('refresh-alerts');
+    if (refreshAlertsBtn) {
+        refreshAlertsBtn.addEventListener('click', loadAlerts);
+    }
+    
+    const viewAnalyticsBtn = document.getElementById('view-analytics-button');
+    if (viewAnalyticsBtn) {
+        viewAnalyticsBtn.addEventListener('click', showAnalytics);
+    }
+    
+    // Load initial alerts
+    loadAlerts();
+});
+
+// Show analytics dashboard
+function showAnalytics() {
+    alert('Network Analytics dashboard would be displayed here');
+}
+
+// Load alerts from error logs
+function loadAlerts() {
+    const alertsContainer = document.getElementById('alerts-container');
+    
+    // Show loading indicator
+    alertsContainer.innerHTML = `
+        <tr>
+            <td colspan="5" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading alerts...</p>
+            </td>
+        </tr>
+    `;
+    
+    // Fetch telecom anomalies
+    axios.get('/api/telecom/anomalies')
+        .then(response => {
+            const anomalies = response.data.telecom_anomalies;
+            
+            if (anomalies && anomalies.length > 0) {
+                alertsContainer.innerHTML = '';
+                
+                // Sort by severity (critical first, then degraded)
+                const sortedAnomalies = [...anomalies].sort((a, b) => {
+                    const severityOrder = { "critical": 0, "warning": 1, "info": 2 };
+                    return severityOrder[a.severity] - severityOrder[b.severity];
+                });
+                
+                // Display anomalies as alerts
+                sortedAnomalies.forEach(anomaly => {
+                    const severityClass = anomaly.severity === 'critical' ? 'danger' : 
+                                         anomaly.severity === 'warning' ? 'warning' : 'info';
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><span class="badge bg-${severityClass}">${anomaly.severity}</span></td>
+                        <td>${anomaly.service}</td>
+                        <td>${escapeHtml(anomaly.message)}</td>
+                        <td>${new Date(anomaly.timestamp).toLocaleString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="analyzeAlert('${anomaly.service}', '${escapeHtml(anomaly.message)}')">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    alertsContainer.appendChild(row);
+                });
+            } else {
+                alertsContainer.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
+                            <p class="mt-2">No active alerts</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching alerts:', error);
+            alertsContainer.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-circle mb-2" style="font-size: 2rem;"></i>
+                        <p>Failed to load alerts: ${error.message}</p>
+                    </td>
+                </tr>
+            `;
+        });
+}
+
+// Analyze a specific alert
+function analyzeAlert(service, message) {
+    // Create issue description
+    const query = `Analyze ${service} issue: ${message}`;
+    
+    // Set the issue description in the analysis form
+    const issueDescription = document.getElementById('issue-description');
+    if (issueDescription) {
+        issueDescription.value = query;
+        
+        // Trigger analysis
+        const analyzeButton = document.getElementById('analyze-button');
+        if (analyzeButton) {
+            analyzeButton.click();
+            
+            // Scroll to analysis section
+            window.scrollTo({
+                top: issueDescription.offsetTop - 100,
+                behavior: 'smooth'
+            });
+        }
+    }
+}
+
+// Export health report
+function exportHealthReport() {
+    // In a real application, this would generate a PDF or export data
+    // For demo purposes, we'll just show an alert
+    alert('Health report export functionality would be implemented here');
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+</script>
+{% endblock %}

@@ -1,0 +1,310 @@
+@import url('https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css');
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
+  --border-radius: 8px;
+  
+  /* Custom colors for telecom components */
+  --telecom-highlight: #00c8ff;
+  --telecom-critical: #ff4d4f;
+  --telecom-warning: #faad14;
+  --telecom-success: #52c41a;
+  --telecom-info: #1890ff;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Custom Application Styles */
+.card {
+  margin-bottom: 1.5rem;
+  border-radius: var(--border-radius);
+}
+
+.health-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.health-indicator.healthy {
+  background-color: var(--telecom-success);
+}
+
+.health-indicator.warning {
+  background-color: var(--telecom-warning);
+}
+
+.health-indicator.critical {
+  background-color: var(--telecom-critical);
+}
+
+.chart-container {
+  height: 300px;
+  width: 100%;
+  position: relative;
+}
+
+.log-entry {
+  border-left: 4px solid var(--telecom-info);
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.log-level-INFO {
+  border-left-color: var(--telecom-info);
+}
+
+.log-level-WARNING {
+  border-left-color: var(--telecom-warning);
+}
+
+.log-level-ERROR, .log-level-CRITICAL {
+  border-left-color: var(--telecom-critical);
+}
+
+.log-level-DEBUG {
+  border-left-color: #9254de;
+}
+
+.anomaly-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.anomaly-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.anomaly-critical {
+  border-left: 4px solid var(--telecom-critical);
+}
+
+.anomaly-warning {
+  border-left: 4px solid var(--telecom-warning);
+}
+
+.anomaly-structural {
+  border-left: 4px solid var(--telecom-info);
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 60vh;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.message {
+  max-width: 80%;
+  padding: 10px 15px;
+  border-radius: 18px;
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+}
+
+.user-message {
+  background-color: #2b5278;
+  color: white;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.ai-message {
+  background-color: #3a3b3c;
+  color: white;
+  align-self: flex-start;
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #444;
+}
+
+.chat-input textarea {
+  flex: 1;
+  border-radius: 20px;
+  padding: 10px 15px;
+  outline: none;
+  resize: none;
+}
+
+.upload-drop-zone {
+  border: 2px dashed #444;
+  border-radius: 5px;
+  padding: 25px;
+  text-align: center;
+  margin: 15px 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.upload-drop-zone:hover {
+  border-color: var(--telecom-highlight);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.status-badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.status-badge.pending {
+  background-color: #d9d9d9;
+  color: #000;
+}
+
+.status-badge.running {
+  background-color: var(--telecom-info);
+  color: white;
+}
+
+.status-badge.completed {
+  background-color: var(--telecom-success);
+  color: white;
+}
+
+.status-badge.failed {
+  background-color: var(--telecom-critical);
+  color: white;
+}
+
+.document-card {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.document-card:hover {
+  transform: translateY(-3px);
+}
+
+.document-card.selected {
+  border: 2px solid var(--telecom-highlight);
+}
+
+/* Network Topology Visualization */
+.network-topology {
+  height: 400px;
+  width: 100%;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.node {
+  stroke: #fff;
+  stroke-width: 2px;
+}
+
+.link {
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1.5px;
+}
+
+/* Animation for loading state */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+/* Dark mode override for form controls */
+.form-control, .form-select {
+  background-color: #2b2b2b;
+  border-color: #444;
+  color: #f8f9fa;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: #333;
+  border-color: var(--telecom-highlight);
+  color: #f8f9fa;
+  box-shadow: 0 0 0 0.25rem rgba(0, 200, 255, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: var(--telecom-highlight);
+  border-color: var(--telecom-highlight);
+}
+
+.btn-primary {
+  background-color: var(--telecom-highlight);
+  border-color: var(--telecom-highlight);
+}
+
+.btn-primary:hover {
+  background-color: #00a6d6;
+  border-color: #00a6d6;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}

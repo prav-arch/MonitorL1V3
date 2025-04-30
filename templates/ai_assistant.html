@@ -1,0 +1,533 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+    .suggestion-card {
+        border-left: 4px solid var(--bs-primary);
+    }
+    .suggestion-highlight {
+        background-color: rgba(255, 193, 7, 0.2);
+    }
+    .level-ERROR {
+        color: var(--bs-danger);
+    }
+    .level-WARN, .level-WARNING {
+        color: var(--bs-warning);
+    }
+    .level-INFO {
+        color: var(--bs-info);
+    }
+    .level-DEBUG {
+        color: var(--bs-secondary);
+    }
+    .level-badge {
+        min-width: 80px;
+    }
+    
+    /* Enhanced Vector Search Styles */
+    #filter-panel {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+    }
+    #filter-panel.show {
+        max-height: 400px;
+    }
+    .filter-card {
+        border-left: 4px solid var(--bs-info);
+    }
+    .search-result-item {
+        transition: background-color 0.2s;
+    }
+    .search-result-item:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+    .applied-filters .badge {
+        margin-right: 5px;
+    }
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        max-width: 350px;
+    }
+    .fade-in {
+        animation: fadeIn 0.3s;
+    }
+    .fade-out {
+        animation: fadeOut 0.3s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-10px); }
+    }
+</style>
+{% endblock %}
+
+{% block assistant_content %}
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-0">AI Assistant</h1>
+                    <p class="text-muted">Intelligent log analysis and troubleshooting powered by LLM</p>
+                </div>
+                <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#modelSettingsModal">
+                    <i class="fas fa-cog me-2"></i> LLM Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-dark border-info mb-4">
+                <div class="card-header bg-info bg-opacity-25 text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-robot me-2"></i> Ask the AI Assistant
+                    </h5>
+                </div>
+                <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label for="issue-description" class="form-label">Describe the issue or ask a question</label>
+                            <textarea class="form-control" id="issue-description" rows="4" placeholder="E.g., Why am I seeing database connection errors? How do I troubleshoot 5G Core service issues?"></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-primary" id="analyze-button">
+                                <i class="fas fa-search me-2"></i> Analyze Logs
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i> Assistant Information
+                                </h6>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modelSettingsModal">
+                                    <i class="fas fa-cog me-1"></i> Settings
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-microchip me-2"></i> LLM Provider</span>
+                                        <span class="badge bg-info" id="llm-provider">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-robot me-2"></i> LLM Model</span>
+                                        <span class="badge bg-info" id="llm-model">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-database me-2"></i> Vector Store</span>
+                                        <span class="badge bg-info" id="vector-status">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-brain me-2"></i> Embedding Model</span>
+                                        <span class="badge bg-info" id="embedding-status">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-chart-line me-2"></i> ML Anomaly Detection</span>
+                                        <span class="badge bg-warning" id="ml-status">Training</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4" id="suggestion-container" style="display: none;">
+                    <div class="card suggestion-card">
+                        <div class="card-header bg-transparent">
+                            <h6 class="mb-0">
+                                <i class="fas fa-lightbulb me-2 text-warning"></i> Troubleshooting Suggestion
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="suggestion-content" id="suggestion-content">
+                                <!-- AI suggestion will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <h6>
+                            <i class="fas fa-link me-2"></i> Relevant Log Entries
+                        </h6>
+                        <div class="list-group small" id="relevant-logs">
+                            <!-- Relevant logs will appear here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-center my-4" id="suggestion-loading" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading suggestion...</span>
+                    </div>
+                    <span class="ms-2">Analyzing logs...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Vector Search -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm mb-4 filter-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-search me-2"></i> Enhanced Vector Search
+                </h5>
+                <button class="btn btn-sm btn-outline-info" id="filter-toggle">
+                    <i class="fas fa-filter me-1"></i> Show Filters
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" id="vector-search-input" 
+                               placeholder="Search for specific log patterns, error messages, or knowledge base entries...">
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-info w-100" id="vector-search-btn">
+                            <i class="fas fa-search me-2"></i> Search
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filter Panel (hidden by default) -->
+                <div id="filter-panel" class="mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body p-3">
+                            <h6 class="mb-3"><i class="fas fa-sliders-h me-2"></i> Search Filters</h6>
+                            
+                            <div class="row mb-3">
+                                <!-- Log Level Filter -->
+                                <div class="col-md-3">
+                                    <label for="log-level-filter" class="form-label">Log Level</label>
+                                    <select class="form-select form-select-sm" id="log-level-filter">
+                                        <option value="">All Levels</option>
+                                        <option value="ERROR">ERROR</option>
+                                        <option value="WARN">WARN</option>
+                                        <option value="INFO">INFO</option>
+                                        <option value="DEBUG">DEBUG</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Service Filter -->
+                                <div class="col-md-3">
+                                    <label for="service-filter" class="form-label">Service</label>
+                                    <select class="form-select form-select-sm" id="service-filter">
+                                        <option value="">All Services</option>
+                                        <option value="database">Database</option>
+                                        <option value="api">API</option>
+                                        <option value="auth">Authentication</option>
+                                        <option value="5g-core">5G Core</option>
+                                        <option value="openran">OpenRAN</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Date Range Filter -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Date Range</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="datetime-local" class="form-control form-control-sm" 
+                                                   id="date-range-start">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="datetime-local" class="form-control form-control-sm" 
+                                                   id="date-range-end">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Metadata Filters -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0">Custom Metadata Filters</label>
+                                    <button class="btn btn-sm btn-outline-primary" id="add-metadata-filter">
+                                        <i class="fas fa-plus"></i> Add Filter
+                                    </button>
+                                </div>
+                                <div id="metadata-filters">
+                                    <!-- Dynamic metadata filters will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="search-results-container" style="display: none;">
+                    <!-- Search results will appear here -->
+                </div>
+                
+                <div class="mt-3">
+                    <h6 class="text-muted">Search Tips:</h6>
+                    <ul class="small text-muted">
+                        <li>Use specific keywords to find more relevant results</li>
+                        <li>Filter by log level to focus on errors or warnings</li>
+                        <li>Add results to context to include them in your next analysis</li>
+                        <li>Search telecom-specific terms for knowledge base entries</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i> Sample Questions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <button class="list-group-item list-group-item-action sample-question">
+                        Why am I seeing database connection errors?
+                    </button>
+                    <button class="list-group-item list-group-item-action sample-question">
+                        What are the most common error patterns in my logs?
+                    </button>
+                    <button class="list-group-item list-group-item-action sample-question">
+                        How do I troubleshoot AMF to SMF connectivity issues?
+                    </button>
+                    <button class="list-group-item list-group-item-action sample-question">
+                        Explain the OpenRAN O-DU resource allocation errors
+                    </button>
+                    <button class="list-group-item list-group-item-action sample-question">
+                        What maintenance is recommended for my network equipment?
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-book me-2"></i> Knowledge Base
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>The AI Assistant is trained on specialized telecom knowledge including:</p>
+                <ul>
+                    <li>5G Core Network Functions (AMF, SMF, UPF, etc.)</li>
+                    <li>O-RAN Architecture Components</li>
+                    <li>Typical error patterns and troubleshooting steps</li>
+                    <li>Common performance issues and optimizations</li>
+                    <li>Predictive maintenance and equipment health analysis</li>
+                </ul>
+                <p>It uses Retrieval-Augmented Generation (RAG) to provide contextually relevant answers based on your logs and the knowledge base.</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> For best results, be specific in your questions and provide context about the issue you're investigating.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Predictive Maintenance Overview -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i> Predictive Maintenance
+                </h5>
+                <button class="btn btn-sm btn-primary" id="refresh-maintenance-btn">
+                    <i class="fas fa-sync-alt me-1"></i> Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="maintenance-loading" class="text-center p-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Analyzing equipment health...</p>
+                </div>
+                
+                <div id="maintenance-content" class="row" style="display: none;">
+                    <!-- Health Overview -->
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-transparent">
+                                <h6 class="mb-0">Equipment Health</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="health-chart" height="200"></canvas>
+                                <div class="text-center mt-3">
+                                    <span class="d-block" id="health-last-updated">Last updated: --</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recommendations -->
+                    <div class="col-md-8 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-transparent">
+                                <h6 class="mb-0">Maintenance Recommendations</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="no-recommendations" class="p-3 text-center" style="display: none;">
+                                    <div class="alert alert-success mb-0">
+                                        <i class="fas fa-check me-2"></i> No immediate maintenance needed. All equipment operating within normal parameters.
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Component</th>
+                                                <th>Action</th>
+                                                <th>Urgency</th>
+                                                <th>Health</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recommendations-table-body">
+                                            <!-- Table rows will be inserted here by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include the vector search functionality -->
+<script src="{{ url_for('static', filename='js/vector-search.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up sample question click handlers
+    const sampleQuestions = document.querySelectorAll('.sample-question');
+    sampleQuestions.forEach(question => {
+        question.addEventListener('click', function() {
+            const issueDescription = document.getElementById('issue-description');
+            if (issueDescription) {
+                issueDescription.value = this.textContent.trim();
+                // Scroll to the text area
+                issueDescription.scrollIntoView({ behavior: 'smooth' });
+                // Focus the text area
+                issueDescription.focus();
+            }
+        });
+    });
+    
+    // Initialize selected logs context for vector search (shared state between components)
+    window.selectedLogs = [];
+    
+    // Function to add logs to selected logs context
+    window.addToSelectedLogs = function(logData) {
+        // Check if already in the selected logs
+        const exists = window.selectedLogs.some(log => 
+            JSON.stringify(log) === JSON.stringify(logData)
+        );
+        
+        if (!exists) {
+            window.selectedLogs.push(logData);
+            showNotification('Added to analysis context', 'success');
+        } else {
+            showNotification('Already in analysis context', 'warning');
+        }
+    };
+});
+</script>
+
+<!-- Model Settings Modal -->
+<div class="modal fade" id="modelSettingsModal" tabindex="-1" aria-labelledby="modelSettingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modelSettingsModalLabel">LLM Configuration</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Select an LLM provider and model to use for AI analysis. OLLAMA models run locally, while other providers require API keys.
+                    </div>
+                </div>
+                <form id="llm-settings-form">
+                    <div class="mb-3">
+                        <label for="llm-provider-select" class="form-label">LLM Provider</label>
+                        <select class="form-select" id="llm-provider-select">
+                            <!-- Providers will be loaded dynamically -->
+                        </select>
+                        <div class="form-text" id="provider-info-text">Choose a provider for AI language models</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="llm-model-select" class="form-label">LLM Model</label>
+                        <select class="form-select" id="llm-model-select">
+                            <!-- Models will be loaded dynamically based on provider -->
+                        </select>
+                        <div class="form-text" id="model-info-text">Select a specific model for this provider</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Advanced Settings</h6>
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-4">
+                                <label for="temperature-slider" class="form-label">Temperature</label>
+                                <input type="range" class="form-range" min="0" max="1" step="0.1" value="0.7" id="temperature-slider">
+                                <div id="temperature-value" class="text-center">0.7</div>
+                                <div class="form-text small">Controls randomness (higher = more creative)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="max-tokens-input" class="form-label">Max Tokens</label>
+                                <input type="number" class="form-control" id="max-tokens-input" value="256" min="1" max="4096">
+                                <div class="form-text small">Maximum response length</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="top-p-slider" class="form-label">Top P</label>
+                                <input type="range" class="form-range" min="0" max="1" step="0.05" value="0.95" id="top-p-slider">
+                                <div id="top-p-value" class="text-center">0.95</div>
+                                <div class="form-text small">Controls diversity of responses</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="api-key-section" style="display: none;">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i> This provider requires an API key. If you haven't provided one yet, you can add it below.
+                        </div>
+                        <div class="mb-3">
+                            <label for="api-key-input" class="form-label" id="api-key-label">API Key</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="api-key-input" placeholder="Enter your API key">
+                                <button class="btn btn-outline-secondary" type="button" id="save-api-key-btn">Save</button>
+                            </div>
+                            <div class="form-text" id="api-key-info">API keys are securely stored as environment variables</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-model-settings">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
