@@ -1,0 +1,42 @@
+[
+  {
+    "timestamp": "2025-04-30 17:42:09",
+    "level": "INFO",
+    "service": "radio-access",
+    "message": "Session initiated for subscriber ID-0126748C",
+    "source_ip": "192.168.210.157",
+    "correlation_id": "corr-a84e65"
+  },
+  {
+    "timestamp": "2025-04-30 17:42:09",
+    "level": "WARN",
+    "service": "core-network",
+    "message": "Retry attempt 708 for operation",
+    "source_ip": "192.168.106.36",
+    "correlation_id": "corr-BC6b12"
+  },
+  {
+    "timestamp": "2025-04-30 17:42:09",
+    "level": "INFO",
+    "service": "subscriber-db",
+    "message": "Configuration update applied to core-network",
+    "source_ip": "192.168.38.34",
+    "correlation_id": "corr-62c9E5"
+  },
+  {
+    "timestamp": "2025-04-30 17:42:09",
+    "level": "INFO",
+    "service": "signaling",
+    "message": "Processed 149 packets successfully",
+    "source_ip": "192.168.3.249",
+    "correlation_id": "corr-AC4CfB"
+  },
+  {
+    "timestamp": "2025-04-30 17:42:09",
+    "level": "ERROR",
+    "service": "signaling",
+    "message": "Timeout occurred during provisioning",
+    "source_ip": "192.168.205.114",
+    "correlation_id": "corr-CC8f4e"
+  }
+]
