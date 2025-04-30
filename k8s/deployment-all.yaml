@@ -55,7 +55,7 @@ spec:
   resources:
     requests:
       storage: 30Gi
-  storageClassName: standard
+  storageClassName: ""
 
 ---
 # PostgreSQL Deployment
@@ -221,6 +221,20 @@ spec:
       labels:
         app: ollama
     spec:
+      # Add tolerations for common taints
+      tolerations:
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+      # Add more specific tolerations based on your cluster's taints
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
       containers:
       - name: ollama-service
         image: ollama/ollama:latest
@@ -230,11 +244,11 @@ spec:
           name: api
         resources:
           requests:
-            memory: "2Gi"
-            cpu: "500m"
+            memory: "1Gi"
+            cpu: "250m"
           limits:
-            memory: "6Gi"
-            cpu: "1500m"
+            memory: "4Gi"
+            cpu: "1000m"
         volumeMounts:
         - name: ollama-data
           mountPath: /root/.ollama
@@ -256,10 +270,8 @@ spec:
           failureThreshold: 10
       volumes:
       - name: ollama-data
-        persistentVolumeClaim:
-          claimName: ollama-data-pvc
-      nodeSelector:
-        kubernetes.io/os: linux
+        # Use emptyDir instead of PVC for easier scheduling
+        emptyDir: {}
 
 ---
 # Ollama Service

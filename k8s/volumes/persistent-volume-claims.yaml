@@ -32,4 +32,5 @@ spec:
   resources:
     requests:
       storage: 30Gi
-  storageClassName: standard
+  # Use default StorageClass by not specifying one
+  storageClassName: ""

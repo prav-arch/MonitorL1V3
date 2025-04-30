@@ -18,18 +18,59 @@ If pods are in a pending state, the most common causes are:
 
 2. **PersistentVolumeClaims not being fulfilled**:
    
-   **Solution**: Check if your cluster has a default StorageClass:
+   **Solution 1**: Use an existing StorageClass or set it to empty string:
    ```bash
    kubectl get storageclass
    ```
    
-   If not, create a storage class or modify your PVCs to use an available one:
+   ```yaml
+   # Option 1: Use an existing storage class
+   storageClassName: <your-storage-class>
+   
+   # Option 2: Use the default storage class by setting empty string
+   storageClassName: ""
+   
+   # Option 3: Use emptyDir instead of PVC for transient storage
+   volumes:
+   - name: data-volume
+     emptyDir: {}
+   ```
+   
+   **Solution 2**: For testing, use `emptyDir` instead of PVCs as a temporary solution:
+   ```yaml
+   volumes:
+   - name: ollama-data
+     # Use emptyDir instead of PVC
+     emptyDir: {}
+   ```
+   
+   Note: `emptyDir` data will be lost when the pod is deleted or restarted.
+
+3. **Node taints preventing scheduling**:
+   
+   **Solution**: Add tolerations to your deployment that match the taints on your nodes:
+   ```yaml
+   tolerations:
+   - key: "node.kubernetes.io/not-ready"
+     operator: "Exists"
+     effect: "NoExecute"
+     tolerationSeconds: 300
+   - key: "node.kubernetes.io/unreachable"
+     operator: "Exists"
+     effect: "NoExecute"
+     tolerationSeconds: 300
+   # Add more based on your cluster's taints
+   - key: "node-role.kubernetes.io/master"
+     operator: "Exists"
+     effect: "NoSchedule"
+   ```
+   
+   To find the taints on your nodes, run:
    ```bash
-   # Change this line in all PVC definitions:
-   storageClassName: standard  # Use an existing storage class name
+   kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints
    ```
 
-3. **Image pull issues**:
+4. **Image pull issues**:
    
    **Solution**: Ensure images are available and policy is set to IfNotPresent:
    ```yaml
