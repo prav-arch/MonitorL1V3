@@ -23,11 +23,11 @@ spec:
           name: api
         resources:
           requests:
-            memory: "4Gi"
-            cpu: "1000m"
+            memory: "2Gi"
+            cpu: "500m"
           limits:
-            memory: "8Gi"
-            cpu: "2000m"
+            memory: "6Gi"
+            cpu: "1500m"
         volumeMounts:
         - name: ollama-data
           mountPath: /root/.ollama
@@ -37,8 +37,19 @@ spec:
               command: 
               - "/bin/sh"
               - "-c"
-              - "ollama pull llama2 || true"
+              - "ollama serve & sleep 30 && ollama pull llama2 || true"
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 11434
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 10
       volumes:
       - name: ollama-data
         persistentVolumeClaim:
           claimName: ollama-data-pvc
+      nodeSelector:
+        kubernetes.io/os: linux
