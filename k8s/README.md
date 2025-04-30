@@ -1,110 +1,80 @@
-# Kubernetes Deployment Structure for L1 Monitoring Application
+# L1 Monitoring Kubernetes Deployment
 
-This directory contains all the necessary Kubernetes configuration files to deploy the L1 Monitoring application with local LLM capabilities.
+This directory contains all the necessary Kubernetes configuration files for deploying the L1 Monitoring application stack.
 
-## File Structure
+## Quick Start
 
-```
-k8s/
-├── configmaps/
-│   └── ollama-init.yaml              # Init script for OLLAMA model download
-├── deployments/
-│   ├── app-deployment.yaml           # L1 Monitoring app deployment
-│   ├── ollama-deployment.yaml        # OLLAMA LLM service deployment
-│   └── postgres-deployment.yaml      # PostgreSQL database deployment
-├── services/
-│   ├── app-service.yaml              # L1 Monitoring app service
-│   ├── ollama-service.yaml           # OLLAMA LLM service
-│   └── postgres-service.yaml         # PostgreSQL database service
-├── volumes/
-│   └── persistent-volume-claims.yaml # PVCs for both OLLAMA and PostgreSQL
-├── secrets/
-│   └── secrets-template.yaml         # Template for required secrets
-├── ingress/
-│   └── app-ingress.yaml              # Ingress for external access
-├── deployment-requirements.txt       # Python dependencies for the app container
-├── deploy.sh                         # Deployment automation script
-├── DEPLOYMENT.md                     # Detailed deployment instructions
-└── README.md                         # This file
-```
+For a simplified deployment, use the combined deployment file:
 
-## Components Overview
-
-### 1. Application (L1 Monitoring)
-
-The main application that provides log analysis and AI-powered suggestions.
-
-- **Deployment**: `deployments/app-deployment.yaml`
-- **Service**: `services/app-service.yaml`
-- **Ingress**: `ingress/app-ingress.yaml`
-- **Dependencies**: PostgreSQL, OLLAMA
-
-### 2. OLLAMA LLM Service
-
-Provides local large language model capabilities through OLLAMA.
-
-- **Deployment**: `deployments/ollama-deployment.yaml`
-- **Service**: `services/ollama-service.yaml`
-- **Config**: `configmaps/ollama-init.yaml`
-- **Storage**: Uses PVC for model storage
-
-### 3. PostgreSQL Database
-
-Stores log entries and analysis data.
-
-- **Deployment**: `deployments/postgres-deployment.yaml`
-- **Service**: `services/postgres-service.yaml`
-- **Storage**: Uses PVC for database files
-
-## Deployment
-
-For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
-
-Quick start:
 ```bash
-# Update the secrets template with your values
-cp secrets/secrets-template.yaml secrets/secrets.yaml
-# Edit secrets.yaml with your base64 encoded values
-
-# Make the deployment script executable
-chmod +x deploy.sh
-
-# Run the deployment script
-./deploy.sh
+kubectl apply -f deployment-all.yaml
 ```
 
-## Resource Requirements
+This single file includes all necessary components:
+- Secret configurations
+- Persistent Volume Claims
+- PostgreSQL database
+- ClickHouse database
+- Ollama LLM service
+- Main L1 Monitoring application
+- Ingress configuration
 
-| Component | CPU Request | Memory Request | CPU Limit | Memory Limit |
-|-----------|------------|----------------|-----------|--------------|
-| L1 Monitoring | 100m | 256Mi | 500m | 512Mi |
-| OLLAMA | 1000m | 2Gi | 2000m | 4Gi |
-| PostgreSQL | 100m | 256Mi | 500m | 512Mi |
+## Individual Component Deployment
 
-Adjust these values in the deployment YAML files based on your cluster resources and workload.
+If you prefer to deploy components individually, use the files in their respective directories:
 
-## Customization
-
-### Scaling the Application
-
-To handle more traffic, you can increase the replicas in `deployments/app-deployment.yaml`:
-
-```yaml
-spec:
-  replicas: 3  # Increase this number for more instances
+1. First deploy the secrets:
+```bash
+kubectl apply -f secrets/secrets.yaml
 ```
 
-### Changing OLLAMA Model
+2. Then create the persistent volume claims:
+```bash
+kubectl apply -f volumes/persistent-volume-claims.yaml
+```
 
-To use a different LLM model, update:
+3. Deploy the database components:
+```bash
+kubectl apply -f deployments/postgres-deployment.yaml
+kubectl apply -f services/postgres-service.yaml
+kubectl apply -f deployments/clickhouse-deployment.yaml
+kubectl apply -f services/clickhouse-service.yaml
+```
 
-1. The init script in `configmaps/ollama-init.yaml`
-2. The `OLLAMA_MODEL` environment variable in `deployments/app-deployment.yaml`
+4. Deploy the Ollama LLM service:
+```bash
+kubectl apply -f deployments/ollama-deployment.yaml
+kubectl apply -f services/ollama-service.yaml
+```
 
-### Custom Domain
+5. Finally, deploy the main application:
+```bash
+kubectl apply -f deployments/app-deployment.yaml
+kubectl apply -f services/app-service.yaml
+kubectl apply -f ingress/app-ingress.yaml
+```
 
-Update the host value in `ingress/app-ingress.yaml` with your domain name.
+## Configuration Notes
 
-## Troubleshooting
+- The application is configured to use ClickHouse as the primary database with PostgreSQL as a fallback
+- Default credentials are used for development (see secrets.yaml)
+- Customize the domain name in the ingress configuration before deploying to production
+- Resource limits are set conservatively and may need adjustment based on your cluster capacity
 
-See the [DEPLOYMENT.md](DEPLOYMENT.md) file for troubleshooting tips and common issues.
+## Monitoring the Deployment
+
+Check the status of your pods:
+```bash
+kubectl get pods
+```
+
+View the logs of a specific pod:
+```bash
+kubectl logs <pod-name>
+```
+
+Port-forward to access the application locally:
+```bash
+kubectl port-forward svc/l1-monitoring 8080:80
+```
+Then access the application at http://localhost:8080
