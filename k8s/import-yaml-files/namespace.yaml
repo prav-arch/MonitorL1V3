@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: l1-monitoring
+  labels:
+    name: l1-monitoring
+    app: l1-monitoring
