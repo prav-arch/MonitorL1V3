@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: l1-monitoring-v2
+  labels:
+    app: l1-monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: l1-monitoring
+  template:
+    metadata:
+      labels:
+        app: l1-monitoring
+    spec:
+      # Add tolerations for scheduling flexibility
+      tolerations:
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - name: l1-monitoring-app
+        image: l1-monitoring:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+          name: http
+        env:
+        # Primary ClickHouse Database Configuration
+        - name: USE_CLICKHOUSE
+          value: "true"
+        - name: CLICKHOUSE_HOST
+          value: "clickhouse"
+        - name: CLICKHOUSE_PORT
+          value: "8123"
+        - name: CLICKHOUSE_DB
+          value: "default"
+        - name: CLICKHOUSE_USER
+          value: "default"
+        - name: CLICKHOUSE_PASSWORD
+          value: ""
+        - name: CLICKHOUSE_URL
+          value: "http://clickhouse:8123"
+          
+        # Fallback PostgreSQL Database Configuration
+        - name: DATABASE_URL
+          value: "postgresql://postgres:postgres@postgres:5432/postgres"
+      
+        # OLLAMA Configuration
+        - name: OLLAMA_HOST
+          value: "ollama"
+        - name: OLLAMA_PORT
+          value: "11434"
+        - name: OLLAMA_URL
+          value: "http://ollama:11434"
+        - name: OLLAMA_MODEL
+          value: "llama2"
+      
+        # App Configuration
+        - name: FLASK_SECRET_KEY
+          value: "l1monitoringsecretkey"
+      
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 5000
+          initialDelaySeconds: 45
+          periodSeconds: 15
